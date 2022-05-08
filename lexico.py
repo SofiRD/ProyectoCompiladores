@@ -27,7 +27,8 @@ reserved = {
    'char' : 'CHAR',
    'true' : 'TRUE',
    'false' : 'FALSE',
-   'return' : 'RETURN'
+   'return' : 'RETURN',
+   'end' : 'END'
 
 }
 
@@ -47,12 +48,14 @@ tokens = [
    'COMA',
    'PUNTO',
    'DOSPUNTOS',
+   'DIFERENT',
    'MENORQUE',
    'MAYORQUE',
    'IGUAL',
    'STRINGG',
    'FLOATT',
-   'INTT'
+   'INTT',
+   'CHARR'
    
 
 ] + list(reserved.values())
@@ -70,10 +73,12 @@ t_RCORCHETE = r'\}'
 t_COMA = r'\,'
 t_PUNTO = r'\.'
 t_DOSPUNTOS = r'\:'
+t_DIFERENT = r'\!'
 t_MENORQUE = r'\<'
 t_MAYORQUE = r'\>'
 t_IGUAL = r'\='
 t_STRINGG = r'\".*?\"'
+t_CHARR = r"\'.\'"
 
 
 # Check for reserved words
