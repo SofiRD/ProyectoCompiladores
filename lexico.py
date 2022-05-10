@@ -43,6 +43,8 @@ tokens = [
    'RPAREN',
    'ID',
    'PUNTOYCOMA',
+   'LBRAQUET',
+   'RBRAQUET',
    'LCORCHETE',
    'RCORCHETE',
    'COMA',
@@ -68,6 +70,8 @@ t_DIVIDE  = r'/'
 t_LPAREN  = r'\('
 t_RPAREN  = r'\)'
 t_PUNTOYCOMA = r'\;'
+t_LBRAQUET = r'\['
+t_RBRAQUET = r'\]'
 t_LCORCHETE = r'\{'
 t_RCORCHETE = r'\}'
 t_COMA = r'\,'
