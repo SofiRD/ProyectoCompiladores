@@ -82,98 +82,186 @@ var_table = {
 }
 
 def p_programa(p):
-    'programa : START progvars'
+    'programa : START programa1 END'
     p[0] = p[1] 
 
-def p_progvars(p):
-    """progvars : progvar progvars
+def p_programa1(p):
+    """programa1 : programa2 programa1
                 | empty"""
     p[0] = p[1]
 
-def p_progvar(p):
-    """progvar : decfuncion 
+def p_programa2(p):
+    """programa2 : decfuncion 
                 | instruccion
                 | clase"""
     p[0] = p[1]
 
-def p_instruccion(p):
-    """instruccion : vars
-                | condicion
-                | usofuncion
-                | loop
-                | bloque
-                | return
-                | asignacion"""
+def p_decfuncion(p):
+    'decfuncion : FUNCTION tipo ID LPAREN parametro RPAREN bloque'
     p[0] = p[1]
+    
+def p_parametro(p):
+    """parametro : tipo decid parametros
+                | empty"""
+    p[0] = p[1]
+
+def p_parametros(p):
+    """parametros : COMA tipo decid parametros
+                | empty"""
+    
+def p_decid(p):
+    'decid : ID decarreglo'
+    p[0] = p[1]
+
+def p_decarreglo:
+    """decarreglo : LBRAQUET INTT RBRAQUET decarreglo
+                | empty"""
 
 def p_clase(p):
-    'clase : CLASS ID bloquec'
+    'clase : CLASS ID bloqueclase'
     p[0] = p[1]
 
-def p_bloquec(p):
-    'bloquec : LCORCHETE cbloquec RCORCHETE'
+def p_bloqueclase(p):
+    'bloqueclase : LCORCHETE funcyvarrec RCORCHETE'
     p[0] = p[1]
 
-def p_cbloquec(p):
-    """cbloquec : cbloquec2 cbloquec
+def p_funcyvarrec(p):
+    """funcyvarrec : funcyvar funcyvarrec
             | empty"""
     p[0] = p[1]
 
-def p_cbloquec2(p):
-    '''cbloquec2 : decfuncion
-                | vars'''
+def p_funcyvar(p):
+    '''funcyvar : decfuncion
+                | decvariable'''
     p[0] = p[1]
 
-def p_vars(p):
-    'vars : type ID ids'
-    var_table['main'].append({'name' : p[2],
-                              'type' : p[1]})
-    for v in p[3]:
+    
+def p_instruccion(p):
+    """instruccion : decvariable
+                | condicion
+                | asignacion_usofuncion
+                | loop
+                | bloque
+                | return"""
+    p[0] = p[1]
+    
+def p_decvariable(p):
+    'decvariable : tipo ids PUNTOYCOMA'
+    for v in p[2]:
         var_table['main'].append({'name' : v,
                                 'type' : p[1]})
     p[0] = p[1]
 
-def p_type(p):
+
+def p_ids(p):
+    'ids: decid variosids'
+    p[0] = p[2].append()
+
+def p_variosids(p):
+    """ids : COMA ids
+            | empty"""
+    if p[1] == None:
+        p[0] = []
+    else:
+        p[0] = p[2]
+
+        
+def p_condicion_parte1(p):
+    'condicion_parte1 : IF LPAREN expresion RPAREN'
+    condicion = PilaO[-1]
+    PilaO.pop()
+    tipo_c = PilaTipos[-1]
+    PilaTipos.pop()
+    if tipo_c != 4:
+        print("ERROR!! la expresion en el if no es boolena")
+    else:
+        Cuadruplos.append(['gotoF', condicion,"_", "_"])
+        PilaSaltos.append(len(Cuadruplos)-1)
+    p[0] = p[1]
+
+def p_condicion(p):
+    'condicion :  condicion_parte1 bloque bloqueelse'
+    destino = PilaSaltos[-1]
+    PilaSaltos.pop()
+    Cuadruplos[destino][3] = len(Cuadruplos)
+    p[0] = p[1]
+
+
+def p_bloqueelse(p):
+    """bloqueelse : ELSE bloque
+            | empty"""
+    Falso = PilaSaltos[-1]
+    PilaSaltos.pop()
+    Cuadruplos.append(["goto","_","_","_"])
+    PilaSaltos.append(len(Cuadruplos)-1)
+    Cuadruplos[Falso][3] = len(Cuadruplos)
+    p[0] = p[1]
+
+def p_while_1(p):
+    'while_1 : WHILE'
+    PilaSaltos.append(len(Cuadruplos))
+    p[0] = p[1]
+
+def p_while_2(p):
+    'while_2 : LPAREN expresion RPAREN'
+    tipo_c = PilaTipos[-1]
+    PilaTipos.pop()
+    if tipo_c != 0 or tipo_c != 1:
+        print("ERROR!! la expresion en el if no es numerico")
+    Cuadruplos.append(['gotoF', PilaO[-1], " ", '_'])
+    PilaO.pop()
+    PilaSaltos.append(len(Cuadruplos)-1)
+    p[0] = p[1]
+
+def p_while(p):
+    'while : while_1 while_2 bloque'
+    Salida = PilaSaltos[-1]
+    PilaSaltos.pop()
+    Regreso = PilaSaltos[-1]
+    PilaSaltos.pop()
+    Cuadruplos.append('goto', " ", " ", Regreso)
+    Cuadruplos[Salida][3] = len(Cuadruplos)
+    p[0] = p[1]
+
+def p_asignacion_usofuncion(p):
+    'asignacion_usofuncion : ID asiguso'
+    p[0] = p[1]
+    
+def p_asiguso(p):
+    """asiguso : asignacion 
+            | usofuncion"""
+    p[0] = p[1]
+    
+def p_asignacion(p):
+    'asignacion : IGUAL expresion PUNTOYCOMA'
+    p[0] = p[1]
+    
+def p_usofuncion(p):
+    'usofuncion : LPAREN expresiones RPAREN PUNTOYCOMA'
+    p[0] = p[1]
+    
+def p_expresiones(p):
+    """expresiones : expresion expresionesvarias
+            | empty"""
+    p[0] = p[1]
+    
+def p_expresionesvarias(p):
+    """expresionesvarias : COMA expresion expresionesvarias
+            | empty"""
+    p[0] = p[1]    
+
+def p_tipo(p):
     '''type : INT
             | FLOAT
             | CHAR
             | BOOL
-            | STRING'''
-
-def p_ids(p):
-    """ids : COMA ID ids
-            | empty"""
-    if(p[1] == None):
-        p[0] = []
-    else:
-        p[0] = p[3].append()
+            | STRING'''    
 
 def p_return(p):
     'return : RETURN expresion PUNTOYCOMA'
     p[0] = p[1]
 
-def p_decfuncion(p):
-    'decfuncion : FUNCTION ID LPAREN fvars RPAREN bloque'
-    p[0] = p[1]
 
-def p_usofuncion(p):
-    'usofuncion : FUNCTION ID LPAREN fvarsu RPAREN PUNTOYCOMA'
-    p[0] = p[1]
-
-def p_fvars(p):
-    """fvars : ID ids
-            | empty"""
-    p[0] = p[1]
-
-def p_fvarsu(p):
-    """fvarsu : expresion fvarsus
-            | empty"""
-    p[0] = p[1]
-
-def p_fvarsus(p):
-    """fvarsus : COMA expresion fvarsus
-            | empty"""
-    p[0] = p[1]
 
 """
 def p_for(p):
@@ -227,33 +315,6 @@ def p_for(p):
     PilaTipos.pop()
 """
 
-def p_while_1(p):
-    'while_1 : WHILE'
-    PilaSaltos.append(len(Cuadruplos))
-    p[0] = p[1]
-
-def p_while_2(p):
-    'while_2 : LPAREN expresion RPAREN'
-    tipo_c = PilaTipos[-1]
-    PilaTipos.pop()
-    if tipo_c != 0 or tipo_c != 1:
-        print("ERROR!! la expresion en el if no es numerico")
-    Cuadruplos.append(['gotoF', PilaO[-1], " ", '_'])
-    PilaO.pop()
-    PilaSaltos.append(len(Cuadruplos)-1)
-    p[0] = p[1]
-
-def p_while(p):
-    'while : while_1 while_2 bloque'
-    Salida = PilaSaltos[-1]
-    PilaSaltos.pop()
-    Regreso = PilaSaltos[-1]
-    PilaSaltos.pop()
-    Cuadruplos.append('goto', " ", " ", Regreso)
-    Cuadruplos[Salida][3] = len(Cuadruplos)
-    p[0] = p[1]
-
-
 def p_bloque(p):
     'bloque : LCORCHETE instrucciones RCORCHETE'
     p[0] = p[1]
@@ -263,27 +324,17 @@ def p_instrucciones(p):
                     | empty"""
     p[0] = p[1]
 
-def p_asignacion(p):
-    'asignacion : ID IGUAL expresion PUNTOYCOMA'
-    p[0] = p[1]
+
+
 
 def p_escritura(p):
-    'escritura : PRINT LPAREN pescritura m_escritura RPAREN PUNTOYCOMA'
+    'escritura : PRINT LPAREN expresion resultado RPAREN PUNTOYCOMA'
     Cuadruplos.append(['print', " ", " ", PilaO[-1]])
     PilaO.pop()
     p[0] = p[1]
 
-def p_pescritura(p):
-    """pescritura : expresion 
-        | STRINGG"""
-    if p[1].type == 'STRINGG':
-        id_t, tipo_t = get_id(p[1].type, p[1].value)
-        PilaO.append(id_t)
-        PilaTipos.append(tipo_t)
-    p[0] = p[1]
-
-def p_m_escritura(p):
-    """m_escritura : COMA pescritura m_escritura
+def p_resultado(p):
+    """m_escritura : COMA expresion resultado
                 | empty"""
     if p[0] == ',':
         Cuadruplos.append(['print', " ", " ", PilaO[-1]])
@@ -414,37 +465,6 @@ def p_factor(p):
 def p_sumresvac(p):
     """sumresvac : sumres
                 | empty"""
-    p[0] = p[1]
-
-def p_condicion_parte1(p):
-    'condicion_parte1 : IF LPAREN expresion RPAREN'
-    condicion = PilaO[-1]
-    PilaO.pop()
-    tipo_c = PilaTipos[-1]
-    PilaTipos.pop()
-    if tipo_c != 4:
-        print("ERROR!! la expresion en el if no es boolena")
-    else:
-        Cuadruplos.append(['gotoF', condicion,"_", "_"])
-        PilaSaltos.append(len(Cuadruplos)-1)
-    p[0] = p[1]
-
-def p_condicion(p):
-    'condicion :  condicion_parte1 bloque else'
-    destino = PilaSaltos[-1]
-    PilaSaltos.pop()
-    Cuadruplos[destino][3] = len(Cuadruplos)
-    p[0] = p[1]
-
-
-def p_else(p):
-    """else : ELSE bloque
-            | empty"""
-    Falso = PilaSaltos[-1]
-    PilaSaltos.pop()
-    Cuadruplos.append(["goto","_","_","_"])
-    PilaSaltos.append(len(Cuadruplos)-1)
-    Cuadruplos[Falso][3] = len(Cuadruplos)
     p[0] = p[1]
 
 def p_var_cte(p):
