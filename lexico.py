@@ -1,4 +1,4 @@
-    # ------------------------------------------------------------
+   # ------------------------------------------------------------
 # calclex.py
 #
 # tokenizer for a simple expression evaluator for
@@ -13,18 +13,16 @@ import ply.lex as lex
 reserved = {
    'start' : 'START',
    'if' : 'IF',
-   'then' : 'THEN',
    'else' : 'ELSE',
    'while' : 'WHILE',
-   'for' : 'FOR',
    'class' : 'CLASS',
    'print' : 'PRINT',
+   'read' : 'READ',
    'function' : 'FUNCTION',
    'int' : 'INT',
    'float' : 'FLOAT',
    'string' : 'STRING',
    'bool' : 'BOOL',
-   'char' : 'CHAR',
    'true' : 'TRUE',
    'false' : 'FALSE',
    'return' : 'RETURN',
@@ -49,15 +47,13 @@ tokens = [
    'RCORCHETE',
    'COMA',
    'PUNTO',
-   'DOSPUNTOS',
    'DIFERENT',
    'MENORQUE',
    'MAYORQUE',
    'IGUAL',
    'STRINGG',
    'FLOATT',
-   'INTT',
-   'CHARR'
+   'INTT'
    
 
 ] + list(reserved.values())
@@ -76,13 +72,11 @@ t_LCORCHETE = r'\{'
 t_RCORCHETE = r'\}'
 t_COMA = r'\,'
 t_PUNTO = r'\.'
-t_DOSPUNTOS = r'\:'
 t_DIFERENT = r'\!'
 t_MENORQUE = r'\<'
 t_MAYORQUE = r'\>'
 t_IGUAL = r'\='
 t_STRINGG = r'\".*?\"'
-t_CHARR = r"\'.\'"
 
 
 # Check for reserved words
@@ -118,15 +112,29 @@ def t_error(t):
 # Build the lexer
 lexer = lex.lex()
 
-# Test it out
+# Test it out 1
 data = '''
 3 + 4 * 10
   + -20 *2.34
   "hola no se"
 '''
 
+#Test it out 2
+data2 = '''
+start
+int x ;
+x = 1 ;
+while(x < 2)
+{
+    int y ;
+    y = 1 ;
+}
+end
+'''
+
 # Give the lexer some input
 lexer.input(data)
+lexer.input(data2)
 
 # Tokenize
 while True:
