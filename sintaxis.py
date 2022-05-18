@@ -10,9 +10,9 @@ import ply.yacc as yacc
 from lexico import tokens
 
 #Vector Polaco
-VP = []
+#VP = []
 OpStack = []
-VarStack = []
+#VarStack = []
 
 #Cuadruplos
 PilaO = []
@@ -21,64 +21,219 @@ PilaSaltos = []
 Cuadruplos = []
 
 #########################################
-#1D(Operator(arrnum))-> 0-+, 1--, 2-/, 3-*,4- >, 5- <, 6- >=, 7- <=, 8- !=, 9- ==
-#2D(operand)-> 0-int, 1-float, 2-char, 3-string, 4-bool
-#3D(Operand)-> 0-int, 1-float, 2- char, 3-string, 4-bool
-#R(Resultant type)->0-int, 1-float, 2- char,3-string, 4-bool, 5- error
-semantico = [
-#+
-[[0, 1, 5, 5, 5], [1, 1, 5, 5, 5], [5, 5, 2, 3, 5], [5, 5, 3, 3, 5], [5, 5, 5, 5, 5]],
-#-
-[[0, 1, 5, 5, 5], [1, 1, 5, 5, 5], [5, 5, 5, 5, 5], [5, 5, 5, 5, 5], [5, 5, 5, 5, 5]],
-#/
-[[0, 1, 5, 5, 5], [1, 1, 5, 5, 5], [5, 5, 5, 5, 5], [5, 5, 5, 5, 5], [5, 5, 5, 5, 5]],
-#*
-[[0, 1, 5, 5, 5], [1, 1, 5, 5, 5], [5, 5, 5, 5, 5], [5, 5, 5, 5, 5], [5, 5, 5, 5, 5]],
-#>
-[[4, 4, 5, 5, 5], [4, 4, 5, 5, 5], [5, 5, 5, 5, 5], [5, 5, 5, 5, 5], [5, 5, 5, 5, 5]],
-#<
-[[4, 4, 5, 5, 5], [4, 4, 5, 5, 5], [5, 5, 5, 5, 5], [5, 5, 5, 5, 5], [5, 5, 5, 5, 5]],
-#>=
-[[4, 4, 5, 5, 5], [4, 4, 5, 5, 5], [5, 5, 5, 5, 5], [5, 5, 5, 5, 5], [5, 5, 5, 5, 5]],
-#<=
-[[4, 4, 5, 5, 5], [4, 4, 5, 5, 5], [5, 5, 5, 5, 5], [5, 5, 5, 5, 5], [5, 5, 5, 5, 5]],
-#!=
-[[4, 4, 4, 4, 4], [4, 4, 4, 4, 4], [4, 4, 4, 4, 4], [4, 4, 4, 4, 4], [4, 4, 4, 4, 4]],
-#==
-[[4, 4, 4, 4, 4], [4, 4, 4, 4, 4], [4, 4, 4, 4, 4], [4, 4, 4, 4, 4], [4, 4, 4, 4, 4]]
-]
 
-type_dict = {
-    "INTT": 0,
-    "FLOATT": 1,
-    "CHARR": 2,
-    "STRINGG": 3,
-    "TRUE": 4,
-    "FALSE": 4
+semantico = {
+    "int" : {
+        "+": {
+            "int" : "int",
+            "float" : "float",
+            "bool" : "error",
+            "string" : "error"
+        },
+        "-": {
+            "int" : "int",
+            "float" : "float",
+            "bool" : "error",
+            "string" : "error"
+        },
+        "/": {
+            "int" : "int",
+            "float" : "float",
+            "bool" : "error",
+            "string" : "error"
+        },
+        "*": {
+            "int" : "int",
+            "float" : "float",
+            "bool" : "error",
+            "string" : "error"
+        },
+        ">": {
+            "int" : "bool",
+            "float" : "bool",
+            "bool" : "error",
+            "string" : "error"
+        },
+         "<": {
+            "int" : "bool",
+            "float" : "bool",
+            "bool" : "error",
+            "string" : "error"
+        },
+         "!=": {
+            "int" : "bool",
+            "float" : "bool",
+            "bool" : "error",
+            "string" : "error"
+        },
+         "==": {
+            "int" : "bool",
+            "float" : "bool",
+            "bool" : "error",
+            "string" : "error"
+        },
+    }, 
+    "float" : {
+        "+": {
+            "int" : "float",
+            "float" : "float",
+            "bool" : "error",
+            "string" : "error"
+        },
+        "-": {
+            "int" : "float",
+            "float" : "float",
+            "bool" : "error",
+            "string" : "error"
+        },
+        "/": {
+            "int" : "float",
+            "float" : "float",
+            "bool" : "error",
+            "string" : "error"
+        },
+        "*": {
+            "int" : "float",
+            "float" : "float",
+            "bool" : "error",
+            "string" : "error"
+        },
+        ">": {
+            "int" : "bool",
+            "float" : "bool",
+            "bool" : "error",
+            "string" : "error"
+        },
+         "<": {
+            "int" : "bool",
+            "float" : "bool",
+            "bool" : "error",
+            "string" : "error"
+        },
+         "!=": {
+            "int" : "bool",
+            "float" : "bool",
+            "bool" : "error",
+            "string" : "error"
+        },
+         "==": {
+            "int" : "bool",
+            "float" : "bool",
+            "bool" : "error",
+            "string" : "error"
+        },
+    },
+    "string" : {
+        "+": {
+            "int" : "error",
+            "float" : "error",
+            "bool" : "error",
+            "string" : "string"
+        },
+        "-": {
+            "int" : "error",
+            "float" : "error",
+            "bool" : "error",
+            "string" : "error"
+        },
+        "/": {
+            "int" : "error",
+            "float" : "error",
+            "bool" : "error",
+            "string" : "error"
+        },
+        "*": {
+            "int" : "error",
+            "float" : "error",
+            "bool" : "error",
+            "string" : "error"
+        },
+        ">": {
+            "int" : "error",
+            "float" : "error",
+            "bool" : "error",
+            "string" : "error"
+        },
+         "<": {
+            "int" : "error",
+            "float" : "error",
+            "bool" : "error",
+            "string" : "error"
+        },
+         "!=": {
+            "int" : "error",
+            "float" : "error",
+            "bool" : "error",
+            "string" : "bool"
+        },
+         "==": {
+            "int" : "error",
+            "float" : "error",
+            "bool" : "error",
+            "string" : "bool"
+        },
+    },
+     "bool" : {
+        "+": {
+            "int" : "error",
+            "float" : "error",
+            "bool" : "error",
+            "string" : "error"
+        },
+        "-": {
+            "int" : "error",
+            "float" : "error",
+            "bool" : "error",
+            "string" : "error"
+        },
+        "/": {
+            "int" : "error",
+            "float" : "error",
+            "bool" : "error",
+            "string" : "error"
+        },
+        "*": {
+            "int" : "error",
+            "float" : "error",
+            "bool" : "error",
+            "string" : "error"
+        },
+        ">": {
+            "int" : "error",
+            "float" : "error",
+            "bool" : "error",
+            "string" : "error"
+        },
+         "<": {
+            "int" : "error",
+            "float" : "error",
+            "bool" : "error",
+            "string" : "error"
+        },
+         "!=": {
+            "int" : "error",
+            "float" : "error",
+            "bool" : "bool",
+            "string" : "error"
+        },
+         "==": {
+            "int" : "error",
+            "float" : "error",
+            "bool" : "bool",
+            "string" : "error"
+        },
+    },
 }
 
-#1D(Operator(arrnum))-> 0-+, 1--, 2-/, 3-*,4- >, 5- <, 6- >=, 7- <=, 8- !=, 9- ==
-oper_dict = {
-    "+": 0,
-    "-": 1,
-    "/": 2,
-    "*": 3,
-    ">": 4,
-    "<": 5,
-    ">=": 6,
-    "<=": 7,
-    "!=": 8,
-    "==": 9
-}
 
-def get_id(type, value):
-    return "id"+str(value), type_dict[type]
-
+id_temp = 0
 def next_temp():
-    return 1
+    global id_temp
+    id_temp += 1
+    return "T"+ str(id_temp)
 
-var_table = {
-    "main" : []
+DirFunc = {
+    "main" : {"var_table" : {}}
 }
 
 def p_programa(p):
@@ -87,35 +242,39 @@ def p_programa(p):
 
 def p_programa1(p):
     """programa1 : programa2 programa1
-                | empty"""
+                  | empty"""
     p[0] = p[1]
 
 def p_programa2(p):
     """programa2 : decfuncion 
-                | instruccion
-                | clase"""
+                    | instruccion  
+                    | clase"""
     p[0] = p[1]
 
 def p_decfuncion(p):
     'decfuncion : FUNCTION tipo ID LPAREN parametro RPAREN bloque'
     p[0] = p[1]
+        
     
 def p_parametro(p):
-    """parametro : tipo decid parametros
-                | empty"""
+    """parametro : tipo decid parametros 
+                    | empty"""
     p[0] = p[1]
 
 def p_parametros(p):
-    """parametros : COMA tipo decid parametros
-                | empty"""
-    
+    """parametros : COMA tipo decid parametros 
+                    | empty"""
+    p[0] = p[1]
+
+
 def p_decid(p):
     'decid : ID decarreglo'
     p[0] = p[1]
 
-def p_decarreglo:
-    """decarreglo : LBRAQUET INTT RBRAQUET decarreglo
-                | empty"""
+def p_decarreglo(p):
+    """decarreglo : LBRAQUET INTT RBRAQUET decarreglo 
+                    | empty"""
+    p[0] = p[1]
 
 def p_clase(p):
     'clase : CLASS ID bloqueclase'
@@ -126,39 +285,43 @@ def p_bloqueclase(p):
     p[0] = p[1]
 
 def p_funcyvarrec(p):
-    """funcyvarrec : funcyvar funcyvarrec
-            | empty"""
+    """funcyvarrec : funcyvar funcyvarrec 
+                    | empty"""
     p[0] = p[1]
 
 def p_funcyvar(p):
-    '''funcyvar : decfuncion
-                | decvariable'''
+    """funcyvar : decfuncion 
+                | decvariable"""
     p[0] = p[1]
-
     
 def p_instruccion(p):
     """instruccion : decvariable
                 | condicion
                 | asignacion_usofuncion
-                | loop
+                | while
                 | bloque
-                | return"""
+                | return
+                | lectura
+                | escritura"""
     p[0] = p[1]
-    
+
 def p_decvariable(p):
     'decvariable : tipo ids PUNTOYCOMA'
-    for v in p[2]:
-        var_table['main'].append({'name' : v,
-                                'type' : p[1]})
+    for var_name in p[2]:
+        if var_name in DirFunc["main"]["var_table"]:
+            print("Error, la variable", var_name, "ya había sido declarada")
+        else:
+            DirFunc["main"]["var_table"][var_name]={'name' : var_name,
+                                'type' : p[1]}
     p[0] = p[1]
 
-
 def p_ids(p):
-    'ids: decid variosids'
-    p[0] = p[2].append()
+    'ids : decid variosids'
+    p[2].append(p[1])
+    p[0] = p[2]
 
 def p_variosids(p):
-    """ids : COMA ids
+    """variosids : COMA ids 
             | empty"""
     if p[1] == None:
         p[0] = []
@@ -166,21 +329,21 @@ def p_variosids(p):
         p[0] = p[2]
 
         
-def p_condicion_parte1(p):
-    'condicion_parte1 : IF LPAREN expresion RPAREN'
+def p_condicion_migaja1(p):
+    'condicion_migaja1 : '
     condicion = PilaO[-1]
     PilaO.pop()
     tipo_c = PilaTipos[-1]
     PilaTipos.pop()
-    if tipo_c != 4:
+
+    if tipo_c != "bool":
         print("ERROR!! la expresion en el if no es boolena")
     else:
-        Cuadruplos.append(['gotoF', condicion,"_", "_"])
+        Cuadruplos.append(['gotoF', condicion," ", "_"])
         PilaSaltos.append(len(Cuadruplos)-1)
-    p[0] = p[1]
 
 def p_condicion(p):
-    'condicion :  condicion_parte1 bloque bloqueelse'
+    'condicion :  IF LPAREN expresion RPAREN condicion_migaja1 bloque bloqueelse'
     destino = PilaSaltos[-1]
     PilaSaltos.pop()
     Cuadruplos[destino][3] = len(Cuadruplos)
@@ -188,53 +351,59 @@ def p_condicion(p):
 
 
 def p_bloqueelse(p):
-    """bloqueelse : ELSE bloque
-            | empty"""
+    """bloqueelse : ELSE bloqueelse_migaja1 bloque
+                    | empty"""
+    
+    p[0] = p[1]
+
+def p_bloqueelse_migaja1(p):
+    'bloqueelse_migaja1 : '
     Falso = PilaSaltos[-1]
     PilaSaltos.pop()
-    Cuadruplos.append(["goto","_","_","_"])
+    Cuadruplos.append(["goto"," "," ","_"])
     PilaSaltos.append(len(Cuadruplos)-1)
     Cuadruplos[Falso][3] = len(Cuadruplos)
-    p[0] = p[1]
 
-def p_while_1(p):
-    'while_1 : WHILE'
+def p_while_migaja1(p):
+    'while_migaja1 : '
     PilaSaltos.append(len(Cuadruplos))
-    p[0] = p[1]
 
-def p_while_2(p):
-    'while_2 : LPAREN expresion RPAREN'
+def p_while_migaja2(p):
+    'while_migaja2 : '
     tipo_c = PilaTipos[-1]
     PilaTipos.pop()
-    if tipo_c != 0 or tipo_c != 1:
-        print("ERROR!! la expresion en el if no es numerico")
+    if tipo_c != "bool":
+        print("ERROR!! la expresion en el while no es booleano")
     Cuadruplos.append(['gotoF', PilaO[-1], " ", '_'])
     PilaO.pop()
     PilaSaltos.append(len(Cuadruplos)-1)
-    p[0] = p[1]
 
 def p_while(p):
-    'while : while_1 while_2 bloque'
+    'while : WHILE while_migaja1  LPAREN expresion RPAREN while_migaja2 bloque'
     Salida = PilaSaltos[-1]
     PilaSaltos.pop()
     Regreso = PilaSaltos[-1]
     PilaSaltos.pop()
-    Cuadruplos.append('goto', " ", " ", Regreso)
+    Cuadruplos.append(['goto', " ", " ", Regreso])
     Cuadruplos[Salida][3] = len(Cuadruplos)
     p[0] = p[1]
 
 def p_asignacion_usofuncion(p):
     'asignacion_usofuncion : ID asiguso'
+    if p[2] == "asig":
+        Cuadruplos.append(['=', PilaO[-1], " ", p[1]])
+        PilaO.pop()
     p[0] = p[1]
     
 def p_asiguso(p):
-    """asiguso : asignacion 
-            | usofuncion"""
+    """asiguso : asignacion
+                | usofuncion"""
     p[0] = p[1]
     
 def p_asignacion(p):
     'asignacion : IGUAL expresion PUNTOYCOMA'
-    p[0] = p[1]
+    
+    p[0] = "asig"
     
 def p_usofuncion(p):
     'usofuncion : LPAREN expresiones RPAREN PUNTOYCOMA'
@@ -242,7 +411,7 @@ def p_usofuncion(p):
     
 def p_expresiones(p):
     """expresiones : expresion expresionesvarias
-            | empty"""
+                    | empty"""
     p[0] = p[1]
     
 def p_expresionesvarias(p):
@@ -251,80 +420,24 @@ def p_expresionesvarias(p):
     p[0] = p[1]    
 
 def p_tipo(p):
-    '''type : INT
+    """tipo : INT 
             | FLOAT
-            | CHAR
-            | BOOL
-            | STRING'''    
+            | BOOL 
+            | STRING"""
+    p[0] = p[1]
 
 def p_return(p):
     'return : RETURN expresion PUNTOYCOMA'
     p[0] = p[1]
-
-
-
-"""
-def p_for(p):
-    'for : FOR LPAREN id asignacion expresion PUNTOYCOMA expresion RPAREN bloque'
-    #Esto va justo después del for, en id
-    PilaSaltos.append(len(Cuadruplos)-1)
-    tipo_c = PilaTipos[-1]
-    PilaTipos.pop()
-    if tipo_c != 0 or tipo_c != 1:
-        print("ERROR!! la expresion en el if no es numerico")
-
-    #Esto por expresion1
-    expresion = PilaO[-1]
-    PilaO.pop()
-    tipo_c = PilaTipos[-1]
-    PilaTipos.pop()
-    if tipo_c != 0 or tipo_c != 1:
-        print("ERROR!! la expresion en el if no es numerico")
-    else:
-        vcontrol = PilaO[-1]
-        tipo_control = PilaTipos[-1]
-        tipo_res = ['=', tipo_control, tipo_c]
-        if tipo_res == ERROR:
-            print("ERROR!! Los tipos de variables no coinciden")
-        else:
-            Cuadruplos.append(['=', expresion, vcontrol])
-
-    #esto despues de segunda expresion
-    tipo_c = PilaTipos[-1]
-    PilaTipos.pop()
-    if tipo_c != 0 or tipo_c != 1:
-        print("ERROR!! la expresion en el if no es numerico")
-    else:
-        vfinal = vcontrol
-        expresion = PilaO[-1]
-        PilaO.pop()
-        Cuadruplos.append(['=', expresion, ' ', vfinal])
-        Cuadruplos.append('MENORQUE', vcontrol, vfinal, 'T'+expresion)
-        PilaSaltos.append(len(Cuadruplos)-1)
-        Cuadruplos.append(['gotoF', 'T'+expresion, ' ', '_'])
-        PilaSaltos.append(len(Cuadruplos)-1)
-
-    #fin de la expresion
-    Cuadruplos.append(['PLUS', vcontrol, 1, 'T'+(expresion + vfinal)])
-    Cuadruplos.append(['=', 'T'+(expresion + vfinal), ' ', vcontrol])
-    Cuadruplos.append(['=', 'T'+(expresion + vfinal), ' ', PilaO[-1]])
-    Cuadruplos.append(['goto', PilaSaltos[-1]])
-    PilaSaltos.pop()
-    Cuadruplos[PilaSaltos[-1]][3] = len(Cuadruplos)
-    PilaO.pop()
-    PilaTipos.pop()
-"""
 
 def p_bloque(p):
     'bloque : LCORCHETE instrucciones RCORCHETE'
     p[0] = p[1]
 
 def p_instrucciones(p):
-    """instrucciones : instruccion instrucciones
-                    | empty"""
+    """instrucciones : instruccion instrucciones 
+                        | empty"""
     p[0] = p[1]
-
-
 
 
 def p_escritura(p):
@@ -334,159 +447,229 @@ def p_escritura(p):
     p[0] = p[1]
 
 def p_resultado(p):
-    """m_escritura : COMA expresion resultado
-                | empty"""
+    """resultado : COMA expresion resultado 
+                    | empty"""
     if p[0] == ',':
         Cuadruplos.append(['print', " ", " ", PilaO[-1]])
         PilaO.pop()
     p[0] = p[1]
 
+def p_lectura(p):
+    'lectura : READ LPAREN lecturaid RPAREN PUNTOYCOMA'
+    Cuadruplos.append(['read', " ", " ", PilaO[-1]])
+    PilaO.pop()
+    p[0] = p[1]
+
+def p_lecturaid(p):
+    'lecturaid : ID  varids'
+    PilaO.append(p[1])
+    p[0] = p[1]
+
+def p_varids(p):
+    """varids : arreglos 
+                    | empty"""
+
+def p_arreglos(p):
+    'arreglos : LBRAQUET expresion RBRAQUET masarreglos'
+    p[0] = p[1]
+
+def p_masarreglos(p):
+    """masarreglos : arreglos 
+                    | empty"""
+
 def p_expresion(p):
-    'expresion : expresion_2 posexp'
-    p[0] = p[1]
-
-def p_expresion_2(p):
-    'expresion_2 : exp'
-    if OpStack[-1] == ">" or OpStack[-1] == "<" or OpStack[-1] == "!":
-        operDer = OpStack[-1]
-        OpStack.pop()
+    'expresion : aritmetica expresion_migaja comparitmetica'
+    exps_validas = [">", "<", "!=", "=="]
+    if len(OpStack) > 0 and OpStack[-1] in exps_validas:
+        operDer = PilaO[-1]
+        PilaO.pop()
         tipoDer = PilaTipos[-1]
         PilaTipos.pop()
-        operIzq = OpStack[-1]
-        OpStack.pop()
+        operIzq = PilaO[-1]
+        PilaO.pop()
         tipoIzq = PilaTipos[-1]
         PilaTipos.pop()
         operador = OpStack[-1]
         OpStack.pop()
-        tipoRes = semantico[tipoIzq, tipoDer, oper_dict[operador]]
-        if tipoRes != 5:
+
+        tipoRes = semantico[tipoIzq][operador][tipoDer]
+        if tipoRes != "error":
             result = next_temp()
             Cuadruplos.append([operador, operIzq, operDer, result])
             PilaO.append(result)
             PilaTipos.append(tipoRes)
         else:
-            print("Error, El tipo de operador esta cuacho")
+            print("Error, El tipo de operador es incorrecto")
     p[0] = p[1]
 
-def p_posexp(p):
-    """posexp : symexp exp
-            | empty"""
+def p_expresion_migaja(p):
+    'expresion_migaja : '
+
+def p_comparitmetica(p):
+    """comparitmetica : comparadores aritmetica
+                        | empty"""
     p[0] = p[1]
 
-def p_symexp(p):
-    """symexp : MAYORQUE
-            | MENORQUE | DIFERENT """
-    OpStack.append(p[1].value)
+def p_comparadores(p):
+    """comparadores : MAYORQUE
+                    | MENORQUE 
+                    | DIFERENT IGUAL
+                    | IGUAL IGUAL """
+    op = p[1]
+    if op == "=" or op == "!":
+        op += "="
+    OpStack.append(op)
     p[0] = p[1]
 
-def p_exp(p):
-    'exp : exp_2 mexp'
+def p_aritmetica(p):
+    'aritmetica : termino aritmetica_migaja aritmetica2'
     p[0] = p[1]
 
-def p_exp_2(p):
-    'exp_2 : termino'
-    if OpStack[-1] == "+" or OpStack[-1] == "-":
-        operDer = OpStack[-1]
-        OpStack.pop()
+def p_aritmetica_migaja(p):
+    'aritmetica_migaja : '
+    if len(OpStack) > 0 and (OpStack[-1] == "+" or OpStack[-1] == "-"):
+        operDer = PilaO[-1]
+        PilaO.pop()
         tipoDer = PilaTipos[-1]
         PilaTipos.pop()
-        operIzq = OpStack[-1]
-        OpStack.pop()
+        operIzq = PilaO[-1]
+        PilaO.pop()
         tipoIzq = PilaTipos[-1]
         PilaTipos.pop()
         operador = OpStack[-1]
         OpStack.pop()
-        tipoRes = semantico[tipoIzq, tipoDer, oper_dict[operador]]
-        if tipoRes != 5:
+        tipoRes = semantico[tipoIzq][operador][tipoDer]
+        if tipoRes != "error":
             result = next_temp()
             Cuadruplos.append([operador, operIzq, operDer, result])
             PilaO.append(result)
             PilaTipos.append(tipoRes)
         else:
-            print("Error, El tipo de operador esta cuacho")
-    p[0] = p[1]
+            print("Error, El tipo de operador es incorrecto")
 
-def p_mexp(p):
-    """mexp : sumres exp
-            | empty"""
+def p_aritmetica2(p):
+    """aritmetica2 : sumres aritmetica
+                    | empty"""
     p[0] = p[1]
 
 def p_sumres(p):
     """sumres : PLUS 
-            | MINUS"""
-    OpStack.append(p[1].value)
+                | MINUS"""
+    OpStack.append(p[1])
     p[0] = p[1]
 
 def p_termino(p):
-    'termino : termino_2 mtermino'
+    'termino : factor termino_migaja ari'
     p[0] = p[1]
 
-def p_termino_2(p):
-    'termino_2: factor'
-    if OpStack[-1] == "*" or OpStack[-1] == "/":
-        operDer = OpStack[-1]
-        OpStack.pop()
+def p_termino_migaja(p):
+    'termino_migaja : '
+    if len(OpStack) > 0 and (OpStack[-1] == "*" or OpStack[-1] == "/"):
+        operDer = PilaO[-1]
+        PilaO.pop()
         tipoDer = PilaTipos[-1]
         PilaTipos.pop()
-        operIzq = OpStack[-1]
-        OpStack.pop()
+        operIzq = PilaO[-1]
+        PilaO.pop()
         tipoIzq = PilaTipos[-1]
         PilaTipos.pop()
         operador = OpStack[-1]
         OpStack.pop()
-        tipoRes = semantico[tipoIzq, tipoDer, oper_dict[operador]]
-        if tipoRes != 5:
+        tipoRes = semantico[tipoIzq][operador][tipoDer]
+        if tipoRes != "error":
             result = next_temp()
             Cuadruplos.append([operador, operIzq, operDer, result])
             PilaO.append(result)
             PilaTipos.append(tipoRes)
         else:
-            print("Error, El tipo de operador esta cuacho")
-    p[0] = p[1]
+            print("Error, El tipo de operador es incorrecto")
 
-def p_mtermino(p):
-    """mtermino : multdiv termino
-                | empty"""
+def p_ari(p):
+    """ari : multdiv termino
+            | empty"""
     p[0] = p[1]
 
 def p_multdiv(p):
     """multdiv : TIMES
-            | DIVIDE"""
-    OpStack.append(p[1].value)
+                | DIVIDE"""
+    OpStack.append(p[1])
     p[0] = p[1]
 
 def p_factor(p):
-    """factor : LPAREN expresion RPAREN
-            | sumresvac var_cte"""
-    if p[1].value == "-":
-        pass
+    """factor : LPAREN factor_migaja expresion RPAREN
+                | posneg variable"""
+    #if p[1].value == "-":
+    #    pass
+    if p[1] == '(' and len(OpStack) > 0 and OpStack[-1] == '(':
+        OpStack.pop()
     p[0] = p[1]
 
-def p_sumresvac(p):
-    """sumresvac : sumres
+def p_factor_migaja(p):
+    'factor_migaja : '
+    OpStack.append('(')
+    p[0] = p[1]
+
+
+def p_posnegc(p):
+    """posneg : sumres
                 | empty"""
     p[0] = p[1]
 
-def p_var_cte(p):
-    """var_cte : usoid
-                | INTT
-                | FLOATT
-                | usofuncion"""
-    PilaO.append[get_id(p[1].type, p[1].value)]
+def p_variable(p):
+    """variable : usoid 
+                | intt
+                | floatt
+                | booll
+                | stringg """
+    #PilaO.append[get_id(p[1].type, p[1].value)]
     p[0] = p[1]
+
+def p_intt(p):
+    'intt : INTT'
+    PilaO.append(p[1])
+    PilaTipos.append("int")
+    p[0] = p[1]
+
+def p_floatt(p):
+    'floatt : FLOATT'
+    PilaO.append(p[1])
+    PilaTipos.append("float")
+    p[0] = p[1]
+
+def p_booll(p):
+    """booll : TRUE
+        | FALSE"""
+    PilaO.append(p[1])
+    PilaTipos.append("bool")
+    p[0] = p[1]
+
+def p_stringg(p):
+    'stringg : STRINGG'
+    PilaO.append(p[1])
+    PilaTipos.append("string")
+    p[0] = p[1]
+
 
 def p_usoid(p):
-    'usoid : ID usoid2'
+    'usoid : ID arrfunc punto'
+    PilaO.append(p[1])
+    tipo = DirFunc["main"]["var_table"][p[1]]["type"]
+    PilaTipos.append(tipo)
     p[0] = p[1]
 
-def p_usoid2(p):
-    """usoid2 : PUNTO ID usoid3 usoid2
+def p_punto(p):
+    """punto : PUNTO usoid 
                 | empty"""
     p[0] = p[1]
 
-def p_usoid3(p):
-    """usoid3 : LPAREN fvarsu RPAREN
+def p_arrfunc(p):
+    """arrfunc : arreglos 
+                | funciones 
                 | empty"""
+    p[0] = p[1]
+
+def p_funciones(p):
+    'funciones : LPAREN expresiones RPAREN'
     p[0] = p[1]
 
 def p_empty(p):
@@ -500,11 +683,12 @@ def p_error(p):
 
 parser = yacc.yacc(debug = True) 
 
-while True:
-   try:
-       s = input('calc > ')
-   except EOFError:
-       break
-   if not s: continue
-   result = parser.parse(s)
-   print(result)
+code_file = open("programaTest.txt", "r")
+code_lines = code_file.read()
+result = parser.parse(code_lines)
+print(result)
+if result:
+    print("Si funciona!")
+    print(Cuadruplos)
+else:
+    print("Error en sintaxis")
