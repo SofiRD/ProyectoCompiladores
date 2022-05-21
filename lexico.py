@@ -16,6 +16,7 @@ reserved = {
    'else' : 'ELSE',
    'while' : 'WHILE',
    'class' : 'CLASS',
+   'void' : 'VOID',
    'print' : 'PRINT',
    'read' : 'READ',
    'function' : 'FUNCTION',
