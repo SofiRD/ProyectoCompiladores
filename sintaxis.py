@@ -225,6 +225,12 @@ semantico = {
     },
 }
 
+#ASIGNACIÓN DE DIRECCIONES DE MEMORIA PARA LA MAQUINA VIRTUAL
+ 
+
+# VARIABLES GLOBALES
+NombreFunc = "global"
+TipoFunc = "global"
 
 id_temp = 0
 def next_temp():
@@ -232,8 +238,15 @@ def next_temp():
     id_temp += 1
     return "T"+ str(id_temp)
 
+#Variables que guardan info sobre el programa global
+nombreProg = "global"
+tipoProg = "global"
+DirInicio = 0
+tamProg = 0
+
 DirFunc = {
-    "main" : {"var_table" : {}}
+    "global" : {"nombre" : nombreProg , "tipo" : tipoProg, "DirIni" : DirInicio,
+                "tamano" : tamProg , "var_table" : {}}
 }
 
 def p_programa(p):
@@ -251,18 +264,86 @@ def p_programa2(p):
                     | clase"""
     p[0] = p[1]
 
+#voy a ir agregando param x param en lugar de todos de un solo :)
+# 1 migaja menos
 def p_decfuncion(p):
-    'decfuncion : FUNCTION tipo ID LPAREN parametro RPAREN bloque'
+    'decfuncion : FUNCTION decfuncion_migaja1 LPAREN parametro RPAREN decfuncion_migaja2 bloque'
+    global id_temp
+    global NombreFunc
+    DirFunc[NombreFunc]["NumTemp"] = id_temp
+    id_temp = 0
+    #Libera
+    NombreFunc = "global"
+    global TipoFunc
+    TipoFunc = "global"
+
+    Cuadruplos.append(["ENDFUNC", " " , " " , " "])
+
     p[0] = p[1]
-        
-    
+
+# NECESITO leer la variable
+def p_decfuncion_migaja1(p):
+    'decfuncion_migaja1 : tipoFuncion ID'
+
+    global NombreFunc
+    global TipoFunc
+
+    if p[2] in DirFunc:
+        print("Error, la funcion ", p[2], "ya había sido declarada")
+    else:
+        NombreFunc = p[2]
+        TipoFunc = p[1]
+
+        DirFunc[p[2]]={"nombre" : p[2] , "tipo" : p[1], "DirIni" : len(Cuadruplos),
+                     "var_table" : {}, "local_table" : [], "NumParam" : 0, 
+                     "NumVars" : 0, "NumTemp" : 0}
+        if p[1] is not "void" :
+            DirFunc["global"]["var_table"][p[2]] = {'name' : p[2],
+                                                    'type' : p[1]}
+    p[0] = p[1]  
+
+
+# NECESITO leer la variable
+def p_decfuncion_migaja2(p):
+    'decfuncion_migaja2 : '
+
+    global NombreFunc 
+
+    DirFunc[NombreFunc]["NumParam"] = len(DirFunc[NombreFunc]["local_table"])
+    DirFunc[NombreFunc]["NumVars"] = len(DirFunc[NombreFunc]["var_table"])
+
+
+#Se agrego void en una funcion de tipos diferentes xq no se acepta void como tipo para variable
+def p_tipoFuncion(p):
+    """tipoFuncion : tipo
+                    | VOID """
+    p[0] = p[1]
+
+# Agrega migaja para ir agregando param x param en la current local table de func
 def p_parametro(p):
-    """parametro : tipo decid parametros 
+    """parametro : parametro_migaja1 parametros 
                     | empty"""
     p[0] = p[1]
 
+# NECESITO leer la variable
+def p_parametro_migaja1(p):
+    'parametro_migaja1 : tipo decid'
+
+    global NombreFunc
+    global TipoFunc
+
+    if p[2] in DirFunc[NombreFunc]["var_table"] :
+        print("Error, el parametro ", p[2], "ya había sido declarado")
+    else :
+        DirFunc[NombreFunc]["var_table"][p[2]] = {'name' : p[2],
+                                                  'type' : p[1]}
+        DirFunc[NombreFunc]["local_table"].append({'name' : p[2],
+                                                   'type' : p[1]})
+    p[0] = p[1]
+
+
 def p_parametros(p):
-    """parametros : COMA tipo decid parametros 
+    """parametros : COMA parametro_migaja1 parametros 
                     | empty"""
     p[0] = p[1]
 
@@ -308,10 +389,10 @@ def p_instruccion(p):
 def p_decvariable(p):
     'decvariable : tipo ids PUNTOYCOMA'
     for var_name in p[2]:
-        if var_name in DirFunc["main"]["var_table"]:
+        if var_name in DirFunc["global"]["var_table"]:
             print("Error, la variable", var_name, "ya había sido declarada")
         else:
-            DirFunc["main"]["var_table"][var_name]={'name' : var_name,
+            DirFunc["global"]["var_table"][var_name]={'name' : var_name,
                                 'type' : p[1]}
     p[0] = p[1]
 
@@ -653,7 +734,7 @@ def p_stringg(p):
 def p_usoid(p):
     'usoid : ID arrfunc punto'
     PilaO.append(p[1])
-    tipo = DirFunc["main"]["var_table"][p[1]]["type"]
+    tipo = DirFunc["global"]["var_table"][p[1]]["type"]
     PilaTipos.append(tipo)
     p[0] = p[1]
 
