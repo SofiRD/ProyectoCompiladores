@@ -15,10 +15,13 @@ OpStack = []
 #VarStack = []
 
 #Cuadruplos
+Cuadruplos = []
+
+#Pilas
 PilaO = []
 PilaTipos = []
 PilaSaltos = []
-Cuadruplos = []
+PilaIDs = []
 
 #########################################
 
@@ -72,6 +75,12 @@ semantico = {
             "bool" : "error",
             "string" : "error"
         },
+         "=": {
+            "int" : "int",
+            "float" : "error",
+            "bool" : "error",
+            "string" : "error"
+        },
     }, 
     "float" : {
         "+": {
@@ -122,6 +131,13 @@ semantico = {
             "bool" : "error",
             "string" : "error"
         },
+         "=": {
+            "int" : "float",
+            "float" : "float",
+            "bool" : "error",
+            "string" : "error"
+        },
+
     },
     "string" : {
         "+": {
@@ -171,6 +187,12 @@ semantico = {
             "float" : "error",
             "bool" : "error",
             "string" : "bool"
+        },
+         "=": {
+            "int" : "error",
+            "float" : "error",
+            "bool" : "error",
+            "string" : "string"
         },
     },
      "bool" : {
@@ -222,6 +244,12 @@ semantico = {
             "bool" : "bool",
             "string" : "error"
         },
+         "=": {
+            "int" : "error",
+            "float" : "error",
+            "bool" : "bool",
+            "string" : "error"
+        },
     },
 }
 
@@ -248,6 +276,15 @@ DirFunc = {
     "global" : {"nombre" : nombreProg , "tipo" : tipoProg, "DirIni" : DirInicio,
                 "tamano" : tamProg , "var_table" : {}}
 }
+
+def get_ID_info(n_id):
+    if n_id not in DirFunc[NombreFunc]["var_table"] :
+        if n_id not in DirFunc["global"]["var_table"] :
+            return False 
+        return DirFunc["global"]["var_table"][n_id]
+ 
+    else :
+        return DirFunc[NombreFunc]["var_table"][n_id]
 
 def p_programa(p):
     'programa : START programa1 END'
@@ -298,8 +335,8 @@ def p_decfuncion_migaja1(p):
                      "var_table" : {}, "local_table" : [], "NumParam" : 0, 
                      "NumVars" : 0, "NumTemp" : 0}
         if p[1] is not "void" :
-            DirFunc["global"]["var_table"][p[2]] = {'name' : p[2],
-                                                    'type' : p[1]}
+            DirFunc["global"]["var_table"][p[2]] = {'nombre' : p[2],
+                                                    'tipo' : p[1]}
     p[0] = p[1]  
 
 
@@ -335,10 +372,10 @@ def p_parametro_migaja1(p):
     if p[2] in DirFunc[NombreFunc]["var_table"] :
         print("Error, el parametro ", p[2], "ya había sido declarado")
     else :
-        DirFunc[NombreFunc]["var_table"][p[2]] = {'name' : p[2],
-                                                  'type' : p[1]}
-        DirFunc[NombreFunc]["local_table"].append({'name' : p[2],
-                                                   'type' : p[1]})
+        DirFunc[NombreFunc]["var_table"][p[2]] = {'nombre' : p[2],
+                                                  'tipo' : p[1]}
+        DirFunc[NombreFunc]["local_table"].append({'nombre' : p[2],
+                                                   'tipo' : p[1]})
     p[0] = p[1]
 
 
@@ -392,8 +429,8 @@ def p_decvariable(p):
         if var_name in DirFunc["global"]["var_table"]:
             print("Error, la variable", var_name, "ya había sido declarada")
         else:
-            DirFunc["global"]["var_table"][var_name]={'name' : var_name,
-                                'type' : p[1]}
+            DirFunc["global"]["var_table"][var_name]={'nombre' : var_name,
+                                'tipo' : p[1]}
     p[0] = p[1]
 
 def p_ids(p):
@@ -470,35 +507,104 @@ def p_while(p):
     p[0] = p[1]
 
 def p_asignacion_usofuncion(p):
-    'asignacion_usofuncion : ID asiguso'
-    if p[2] == "asig":
-        Cuadruplos.append(['=', PilaO[-1], " ", p[1]])
-        PilaO.pop()
+    'asignacion_usofuncion : asignacion_usofuncion_migaja1 asiguso'
+    PilaIDs.pop()
     p[0] = p[1]
-    
+
+def p_asignacion_usofuncion_migaja1(p):
+    'asignacion_usofuncion_migaja1 : ID'
+    PilaIDs.append(p[1])
+    p[0] = p[1]
+
+#MIGAJA1 DE LLAMADA: VERIFICA QUE LA FUNCION EXISTA EN DIRFUNC
+#PROBLEMAS:
+# 1.Necesitamos saber si es uso funcion antes de buscar el ID en el dirFunc porque 
+# si es asignacion el ID no reprenta una funcion 
+# USOFUNCION: Funcion(x);
+# ASIGNACION: x = (3 * 4(funcion(x)))
+# 2. En la parte del codigo donde nos dice si es uso funcion o asignaciion no tenemos el ID
+# SOLUCION:
+# Variable global que nos diga cual es el current ID
+# OTRO PROBLEMAAAAA!!!! :(((((
+# Funcion1 (x,funcion2(y))
+# currentID = funcion1
+# currentID = funcion2
+# SOLUCION:
+# Pila de IDs
+
+
 def p_asiguso(p):
     """asiguso : asignacion
                 | usofuncion"""
     p[0] = p[1]
     
 def p_asignacion(p):
-    'asignacion : IGUAL expresion PUNTOYCOMA'
+    'asignacion : asignacion_migaja1 IGUAL expresion PUNTOYCOMA'
+    id_info = get_ID_info(PilaIDs[-1])
     
-    p[0] = "asig"
-    
-def p_usofuncion(p):
-    'usofuncion : LPAREN expresiones RPAREN PUNTOYCOMA'
+    tipo_c = PilaTipos[-1]
+    PilaTipos.pop()
+    if semantico[id_info["tipo"]]["="][tipo_c] != "error" : 
+        Cuadruplos.append(['=', PilaO[-1], " ", PilaIDs[-1]])
+    else :
+        print("Error no se puede realizar esta asignacion")
+    PilaO.pop()
     p[0] = p[1]
+
+def p_asignacion_migaja1(p):
+    'asignacion_migaja1 : '
+    id_info = get_ID_info(PilaIDs[-1])
+    if id_info == False :
+        print("Error, la variable", PilaIDs[-1],"no existe ")
+
+
+
+def p_usofuncion(p):
+    'usofuncion : usofuncion_migaja1 LPAREN usofuncion_migaja2 RPAREN PUNTOYCOMA'
+    Cuadruplos.append(["GOSUB", " " , " " , PilaIDs[-1]])
+    p[0] = p[1]
+
+def p_usofuncion_migaja1(p):
+    'usofuncion_migaja1 : '
+    if PilaIDs[-1] not in DirFunc :
+        print ("Error, esa función no ha sido declarada")
+    else: 
+        Cuadruplos.append(["ERA", " " , " ", PilaIDs[-1]])
     
+def p_usofuncion_migaja2(p):
+    'usofuncion_migaja2 : expresiones'
+    if len(p[1]) != len(DirFunc[PilaIDs[-1]]["local_table"]):
+        print("Error, no tiene el numero correcto de parametros para la funcion")
+    else:
+        for i in range(len(p[1])):
+            tipo_declaracion = DirFunc[PilaIDs[-1]]["local_table"][i]["tipo"]
+            tipo_uso = p[1][i]["tipo"]
+            if semantico[tipo_declaracion]["="][tipo_uso] != "error":
+                Cuadruplos.append(["PARAM", p[1][i]["nombre"], " ", i])
+            else:
+                print("Error, los tipos no se pueden operar")
+
 def p_expresiones(p):
     """expresiones : expresion expresionesvarias
                     | empty"""
-    p[0] = p[1]
+    if p[1] is not None :
+        p[2].insert(0, {"tipo" : PilaTipos[-1], "nombre" : PilaO[-1]})
+        p[0] = p[2]
+        PilaTipos.pop()
+        PilaO.pop()
+    else :
+        p[0] = [ ]
     
 def p_expresionesvarias(p):
     """expresionesvarias : COMA expresion expresionesvarias
             | empty"""
-    p[0] = p[1]    
+    if p[1] is not None :
+        p[3].insert(0, {"tipo" : PilaTipos[-1], "nombre" : PilaO[-1]})
+        p[0] = p[3]
+        PilaTipos.pop()
+        PilaO.pop()
+    else:
+        p[0] = []
 
 def p_tipo(p):
     """tipo : INT 
@@ -581,7 +687,7 @@ def p_expresion(p):
             PilaTipos.append(tipoRes)
         else:
             print("Error, El tipo de operador es incorrecto")
-    p[0] = p[1]
+    p[0] = "exp"
 
 def p_expresion_migaja(p):
     'expresion_migaja : '
@@ -702,7 +808,7 @@ def p_variable(p):
                 | floatt
                 | booll
                 | stringg """
-    #PilaO.append[get_id(p[1].type, p[1].value)]
+    #PilaO.append[get_id(p[1].tipo, p[1].value)]
     p[0] = p[1]
 
 def p_intt(p):
@@ -732,10 +838,17 @@ def p_stringg(p):
 
 
 def p_usoid(p):
-    'usoid : ID arrfunc punto'
-    PilaO.append(p[1])
-    tipo = DirFunc["global"]["var_table"][p[1]]["type"]
-    PilaTipos.append(tipo)
+    'usoid : usoid_migaja1 arrfunc punto'
+    if p[2] is None and p[3] is None:
+        PilaO.append(p[1])
+        tipo = DirFunc["global"]["var_table"][p[1]]["tipo"]
+        PilaTipos.append(tipo)
+    PilaIDs.pop()
+    p[0] = p[1]
+
+def p_usoid_migaja1(p):
+    'usoid_migaja1 : ID'
+    PilaIDs.append(p[1])
     p[0] = p[1]
 
 def p_punto(p):
@@ -750,7 +863,8 @@ def p_arrfunc(p):
     p[0] = p[1]
 
 def p_funciones(p):
-    'funciones : LPAREN expresiones RPAREN'
+    'funciones : usofuncion_migaja1 LPAREN usofuncion_migaja2 RPAREN'
+    Cuadruplos.append(["GOSUB", " " , " " , PilaIDs[-1]])
     p[0] = p[1]
 
 def p_empty(p):
