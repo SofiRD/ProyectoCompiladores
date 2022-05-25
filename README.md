@@ -10,3 +10,5 @@ Semana 5:
 Se actualizó la sintaxis y la gramática. Se empezó con la generación del documento final. Se arreglaron cuádruplos de expresiones, print y algunos errores en el de ciclo while. Se comenzó a probar algunas instrucciones de aritmética, estatutos secuenciales, condicionales y loops a través de la impresión de sus respectivos cuadruplos. Aún no se generó el código de funciones, se tuvo un atraso.
 Semana 6:
 Se generó el código de funciones y también se planeó y codificó el mapa de memoria para la máquina virtual. Por último la lectura del cubo semántico por una más entendible.
+Semana 7: 
+Se terminó de codificar la llamada a funciones, conjunto con sus cuadruplos y se comenzo a programar la maquina virtual.
