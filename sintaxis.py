@@ -728,7 +728,7 @@ def p_lecturaid(p):
     if id_info != False:
         PilaO.append(id_info["direccion"])
     else:
-        pirnt("Error, el id", p[1], "no existe")
+        print("Error, el id", p[1], "no existe")
     p[0] = p[1]
 
 def p_varids(p):
