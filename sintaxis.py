@@ -28,7 +28,40 @@ PilaTipos = []
 PilaSaltos = []
 PilaIDs = []
 
+# Directorio de funciones
+# Globales: 0 - 2000
+#   int 0 - 250
+#   float 250-500
+#   string 500 - 750
+#   bool 750-1000
+#Locales: 1000 - 2000
+#   int 1000-1250
+#   float 1250 - 1500
+#   string 1500 - 1750
+#   bool 1750 - 2000
+#Temporales 2000 - 4000
+#   Globales 2000 - 3000
+#     int 2000-2250
+#     float 2250 - 2500
+#     string 2500 - 2750
+#     bool 2750 - 3000
+#   Locales
+#     int 3000-3250
+#     float 3250 - 3500
+#     string 3500 - 3750
+#     bool 3750 - 4000
+#CTEs 4000 - 5000
+#   int 4000 - 4250
+#   float 4250 - 4500
+#   string 4500 - 4750
+#   bool 4750 - 4752
+
 #########################################
+
+
+direcciones_CTEs = {'int' : 4000 , 'float' : 4250, 'string' : 4500, 'bool' : 4750}
+
+TablaMemoria_CTEs = {'int' : [ ] , 'float' : [ ], 'string' : [ ], 'bool' : [True,False]}
 
 semantico = {
     "int" : {
@@ -279,10 +312,10 @@ NombreFunc = "global"
 TipoFunc = "global"
 
 id_temp = 0
-def next_temp():
-    global id_temp
-    id_temp += 1
-    return "T"+ str(id_temp)
+def next_temp(tipo_var):
+    dir_temp = DirFunc[NombreFunc]["direcciones_temporales"][tipo_var]
+    DirFunc[NombreFunc]["direcciones_temporales"][tipo_var] += 1
+    return dir_temp
 
 #Variables que guardan info sobre el programa global
 nombreProg = "global"
@@ -292,7 +325,10 @@ tamProg = 0
 
 DirFunc = {
     "global" : {"nombre" : nombreProg , "tipo" : tipoProg, "DirIni" : DirInicio,
-                "tamano" : tamProg , "var_table" : {}}
+                "tamano" : tamProg , "var_table" : {},
+                "direcciones" : {'int' : 0 , 'float' : 250, 'string' : 500, 'bool' : 750},
+                "direcciones_temporales" : {'int' : 2000 , 'float' : 2250, 'string' : 2500, 'bool' : 2750}#
+                }
 }
 
 def get_ID_info(n_id):
@@ -351,10 +387,14 @@ def p_decfuncion_migaja1(p):
 
         DirFunc[p[2]]={"nombre" : p[2] , "tipo" : p[1], "DirIni" : len(Cuadruplos),
                      "var_table" : {}, "local_table" : [], "NumParam" : 0, 
-                     "NumVars" : 0, "NumTemp" : 0}
+                     "NumVars" : 0, "NumTemp" : 0,
+                     "direcciones": {'int' : 1000 , 'float' : 1250, 'string' : 1500, 'bool' : 1750},
+                     "direcciones_temporales": {'int' : 3000 , 'float' : 3250, 'string' : 3500, 'bool' : 3750}}
         if p[1] is not "void" :
             DirFunc["global"]["var_table"][p[2]] = {'nombre' : p[2],
-                                                    'tipo' : p[1]}
+                                                    'tipo' : p[1],
+                                                    'direccion' : DirFunc["global"]["direcciones"][p[1]]}
+            DirFunc["global"]["direcciones"][p[1]] += 1
     p[0] = p[1]  
 
 
@@ -391,9 +431,12 @@ def p_parametro_migaja1(p):
         print("Error, el parametro ", p[2], "ya había sido declarado")
     else :
         DirFunc[NombreFunc]["var_table"][p[2]] = {'nombre' : p[2],
-                                                  'tipo' : p[1]}
+                                                  'tipo' : p[1],
+                                                  'direccion' : DirFunc[NombreFunc]["direcciones"][p[1]]}
         DirFunc[NombreFunc]["local_table"].append({'nombre' : p[2],
-                                                   'tipo' : p[1]})
+                                                   'tipo' : p[1],
+                                                   'direccion' : DirFunc[NombreFunc]["direcciones"][p[1]]})
+        DirFunc[NombreFunc]["direcciones"][p[1]] += 1
     p[0] = p[1]
 
 
@@ -448,7 +491,10 @@ def p_decvariable(p):
             print("Error, la variable", var_name, "ya había sido declarada")
         else:
             DirFunc["global"]["var_table"][var_name]={'nombre' : var_name,
-                                'tipo' : p[1]}
+                                'tipo' : p[1],
+                                'direccion' : DirFunc[NombreFunc]["direcciones"][p[1]]
+                                }
+            DirFunc[NombreFunc]["direcciones"][p[1]] += 1
     p[0] = p[1]
 
 def p_ids(p):
@@ -563,7 +609,7 @@ def p_asignacion(p):
     tipo_c = PilaTipos[-1]
     PilaTipos.pop()
     if semantico[id_info["tipo"]]["="][tipo_c] != "error" : 
-        Cuadruplos.append(['=', PilaO[-1], " ", PilaIDs[-1]])
+        Cuadruplos.append(['=', PilaO[-1], " ", id_info["direccion"]])
     else :
         print("Error no se puede realizar esta asignacion")
     PilaO.pop()
@@ -667,7 +713,11 @@ def p_lectura(p):
 
 def p_lecturaid(p):
     'lecturaid : ID  varids'
-    PilaO.append(p[1])
+    id_info = get_ID_info(p[1])
+    if id_info != False:
+        PilaO.append(id_info["direccion"])
+    else:
+        pirnt("Error, el id", p[1], "no existe")
     p[0] = p[1]
 
 def p_varids(p):
@@ -699,7 +749,7 @@ def p_expresion(p):
 
         tipoRes = semantico[tipoIzq][operador][tipoDer]
         if tipoRes != "error":
-            result = next_temp()
+            result = next_temp(tipoRes)
             Cuadruplos.append([operador, operIzq, operDer, result])
             PilaO.append(result)
             PilaTipos.append(tipoRes)
@@ -745,7 +795,7 @@ def p_aritmetica_migaja(p):
         OpStack.pop()
         tipoRes = semantico[tipoIzq][operador][tipoDer]
         if tipoRes != "error":
-            result = next_temp()
+            result = next_temp(tipoRes)
             Cuadruplos.append([operador, operIzq, operDer, result])
             PilaO.append(result)
             PilaTipos.append(tipoRes)
@@ -782,7 +832,7 @@ def p_termino_migaja(p):
         OpStack.pop()
         tipoRes = semantico[tipoIzq][operador][tipoDer]
         if tipoRes != "error":
-            result = next_temp()
+            result = next_temp(tipoRes)
             Cuadruplos.append([operador, operIzq, operDer, result])
             PilaO.append(result)
             PilaTipos.append(tipoRes)
@@ -831,36 +881,49 @@ def p_variable(p):
 
 def p_intt(p):
     'intt : INTT'
-    PilaO.append(p[1])
+    PilaO.append(direcciones_CTEs["int"])
     PilaTipos.append("int")
+    TablaMemoria_CTEs["int"].append(p[1])
+    direcciones_CTEs["int"] += 1
     p[0] = p[1]
 
 def p_floatt(p):
     'floatt : FLOATT'
-    PilaO.append(p[1])
+    PilaO.append(direcciones_CTEs["float"])
     PilaTipos.append("float")
+    TablaMemoria_CTEs["float"].append(p[1])
+    direcciones_CTEs["float"] += 1
     p[0] = p[1]
+
 
 def p_booll(p):
     """booll : TRUE
         | FALSE"""
     PilaO.append(p[1])
     PilaTipos.append("bool")
+    if p[1] == "true" :
+        PilaO.append(4750)
+    else  :
+        PilaO.append(4751)
     p[0] = p[1]
 
 def p_stringg(p):
     'stringg : STRINGG'
-    PilaO.append(p[1])
+    PilaO.append(direcciones_CTEs["string"])
     PilaTipos.append("string")
+    TablaMemoria_CTEs["string"].append(p[1])
+    direcciones_CTEs["string"] += 1
     p[0] = p[1]
 
 
 def p_usoid(p):
     'usoid : usoid_migaja1 arrfunc punto'
     if p[2] is None and p[3] is None:
-        PilaO.append(p[1])
-        tipo = DirFunc["global"]["var_table"][p[1]]["tipo"]
-        PilaTipos.append(tipo)
+        id_info = get_ID_info(p[1])
+        if id_info != False:
+            PilaO.append(id_info["direccion"])
+            tipo = id_info["tipo"]
+            PilaTipos.append(tipo)
     PilaIDs.pop()
     p[0] = p[1]
 
