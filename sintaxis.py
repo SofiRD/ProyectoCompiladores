@@ -2,8 +2,13 @@
 # Sofia Recinos Dorst  A01657055
 # Ulrich Nuño Tapia  A00821805
 
+from ctypes import py_object
 from curses import ERR
 from distutils.log import ERROR
+from inspect import _void
+from logging.handlers import MemoryHandler
+import string
+import struct
 import ply.yacc as yacc
 
 # Get the token map from the lexer.  This is required.
@@ -254,7 +259,20 @@ semantico = {
 }
 
 #ASIGNACIÓN DE DIRECCIONES DE MEMORIA PARA LA MAQUINA VIRTUAL
- 
+StartInt = 0
+GlobalInt = 1000
+GlobalFloat = 2000
+GlobalBool = 3000
+GlobalString = 4000
+LocalInt = 5000
+LocalFloat = 6000
+LocalBool = 7000
+LocalString = 8000
+StartTemp = 9000
+StartCond = 10000
+StartFunc = 11000
+memoria = [["SInt(main)", "GI", "GF", "GB", "GStr", "LI", "LF", "LB", "LStr", "STemp", "SCond", "SFunc"]
+            [StartInt,GlobalFloat,GlobalBool,GlobalString,LocalInt,LocalFloat,LocalBool,LocalString,StartTemp,StartCond,StartFunc]]
 
 # VARIABLES GLOBALES
 NombreFunc = "global"
