@@ -28,6 +28,37 @@ PilaTipos = []
 PilaSaltos = []
 PilaIDs = []
 
+# Directorio de funciones
+# Globales: 0 - 2000
+#   int 0 - 250
+#   float 250-500
+#   string 500 - 750
+#   bool 750-1000
+#Locales: 1000 - 2000
+#   int 1000-1250
+#   float 1250 - 1500
+#   string 1500 - 1750
+#   bool 1750 - 2000
+#Temporales 2000 - 4000
+#   Globales 2000 - 3000
+#     int 2000-2250
+#     float 2250 - 2500
+#     string 2500 - 2750
+#     bool 2750 - 3000
+#   Locales
+#     int 3000-3250
+#     float 3250 - 3500
+#     string 3500 - 3750
+#     bool 3750 - 4000
+#CTEs 4000 - 5000
+#   int 4000 - 4250
+#   float 4250 - 4500
+#   string 4500 - 4750
+#   bool 4750 - 4752
+
+#########################################
+
+#ASIGNACIÓN DE DIRECCIONES DE MEMORIA PARA LA MAQUINA VIRTUAL
 direcciones_CTEs = {'int' : 4000 , 'float' : 4250, 'string' : 4500, 'bool' : 4750}
 
 TablaMemoria_CTEs = {'int' : [ ] , 'float' : [ ], 'string' : [ ], 'bool' : [True,False]}
@@ -259,64 +290,6 @@ semantico = {
         },
     },
 }
-
-# Directorio de funciones
-# Globales: 0 - 2000
-#   int 0 - 250
-#   float 250-500
-#   string 500 - 750
-#   bool 750-1000
-#Locales: 1000 - 2000
-#   int 1000-1250
-#   float 1250 - 1500
-#   string 1500 - 1750
-#   bool 1750 - 2000
-#Temporales 2000 - 4000
-#   Globales 2000 - 3000
-#     int 2000-2250
-#     float 2250 - 2500
-#     string 2500 - 2750
-#     bool 2750 - 3000
-#   Locales
-#     int 3000-3250
-#     float 3250 - 3500
-#     string 3500 - 3750
-#     bool 3750 - 4000
-#CTEs 4000 - 5000
-#   int 4000 - 4250
-#   float 4250 - 4500
-#   string 4500 - 4750
-#   bool 4750 - 4752
-
-#########################################
-
-#ASIGNACIÓN DE DIRECCIONES DE MEMORIA PARA LA MAQUINA VIRTUAL
-#Globales
-GlobalInt = 0
-GlobalFloat = 250
-GlobalString = 500
-GlobalBool = 750
-#Locales
-LocalInt = 1000
-LocalFloat = 1250
-LocalString = 1500
-LocalBool = 1750
-#Temporales
-TempInt = 2000
-TempFloat = 2250
-TempString = 2500
-TempBool = 2750
-#Constantes
-ConstInt = 4000
-ConstFloat = 4250
-ConstString = 4500
-ConstBool = 4750
-#Condicionales
-StartCond = 10000
-#funciones
-StartFunc = 11000
-memoria = [["GI", "GF", "GStr", "GB", "LI", "LF", "LStr", "LB", "TI", "TF", "TStr", "TB", "CI", "CF", "CStr", "CB", "SCond", "SFunc"]
-            [GlobalInt,GlobalFloat,GlobalString,GlobalBool,LocalInt,LocalFloat,LocalString,LocalBool,TempInt,TempFloat,TempString,TempBool,ConstInt,ConstFloat,ConstString,ConstBool,StartCond,StartFunc]]
 
 # VARIABLES GLOBALES
 NombreFunc = "global"
