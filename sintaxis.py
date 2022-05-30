@@ -2,13 +2,8 @@
 # Sofia Recinos Dorst  A01657055
 # Ulrich Nuño Tapia  A00821805
 
-from ctypes import py_object
 from curses import ERR
 from distutils.log import ERROR
-from inspect import _void
-from logging.handlers import MemoryHandler
-import string
-import struct
 import ply.yacc as yacc
 
 # Get the token map from the lexer.  This is required.
@@ -58,7 +53,7 @@ PilaIDs = []
 
 #########################################
 
-#ASIGNACIÓN DE DIRECCIONES DE MEMORIA PARA LA MAQUINA VIRTUAL
+
 direcciones_CTEs = {'int' : 4000 , 'float' : 4250, 'string' : 4500, 'bool' : 4750}
 
 TablaMemoria_CTEs = {'int' : [ ] , 'float' : [ ], 'string' : [ ], 'bool' : [True,False]}
@@ -291,6 +286,9 @@ semantico = {
     },
 }
 
+#ASIGNACIÓN DE DIRECCIONES DE MEMORIA PARA LA MAQUINA VIRTUAL
+ 
+
 # VARIABLES GLOBALES
 NombreFunc = "global"
 TipoFunc = "global"
@@ -316,6 +314,7 @@ DirFunc = {
 }
 
 def get_ID_info(n_id):
+    global NombreFunc
     if n_id not in DirFunc[NombreFunc]["var_table"] :
         if n_id not in DirFunc["global"]["var_table"] :
             return False 
