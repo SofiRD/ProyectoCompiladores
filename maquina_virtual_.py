@@ -35,14 +35,14 @@ def Era(nameFunction):
 	global sig_funcion
 	info_funcion = DirFunc[nameFunction]
     sig_TablaMemoria_Locales = {'int' : [0]*(info_funcion[direcciones]["int"]-1000) , 
-    								'float' : [0]*(info_funcion[direcciones]["int"]-1250), 
+    								'float' : [0]*(info_funcion[direcciones]["float"]-1250), 
     								'string' : [" "]*[0]*(info_funcion[direcciones]["string"]-1500), 
-    								'bool' : [0]*(info_funcion[direcciones]["int"]-1750)}
+    								'bool' : [0]*(info_funcion[direcciones]["bool"]-1750)}
 
     sig_TablaMemoria_Locales_temp = {'int' : [0]*(info_funcion[direcciones]["int"]-3000) , 
-    								'float' : [0]*(info_funcion[direcciones]["int"]-3250), 
+    								'float' : [0]*(info_funcion[direcciones]["float"]-3250), 
     								'string' : [" "]*[0]*(info_funcion[direcciones]["string"]-3500), 
-    								'bool' : [0]*(info_funcion[direcciones]["int"]-3750)}
+    								'bool' : [0]*(info_funcion[direcciones]["bool"]-3750)}
     sig_funcion = nameFunction
 
 def GoSub():
@@ -52,9 +52,6 @@ def GoSub():
     PilaFunciones.append(sig_funcion)
 
 
-
-def assign_param()
-
 posicion = 0 
 
 while True:
@@ -63,6 +60,30 @@ while True:
 		# + , OpIzq, OpDer, Direccion_Destino
 		try:
 			assign_value(instruccion[3], get_element(instruccion[1]) + get_element(instruccion[2]))
+			posicion += 1
+		except exception as e:
+			print(e)
+	
+	elif instruccion[0] == "-":
+		# - , OpIzq, OpDer, Direccion_Destino
+		try:
+			assign_value(instruccion[3], get_element(instruccion[1]) - get_element(instruccion[2]))
+			posicion += 1
+		except exception as e:
+			print(e)
+
+	elif instruccion[0] == "*":
+		# * , OpIzq, OpDer, Direccion_Destino
+		try:
+			assign_value(instruccion[3], get_element(instruccion[1]) * get_element(instruccion[2]))
+			posicion += 1
+		except exception as e:
+			print(e)
+
+	elif instruccion[0] == "/":
+		# / , OpIzq, OpDer, Direccion_Destino
+		try:
+			assign_value(instruccion[3], get_element(instruccion[1]) / get_element(instruccion[2]))
 			posicion += 1
 		except exception as e:
 			print(e)
