@@ -87,6 +87,41 @@ while True:
 			posicion += 1
 		except exception as e:
 			print(e)
+	elif instruccion[0] == "<":
+		# < , OpIzq, OpDer, Direccion_Destino
+		try:
+			assign_value(instruccion[3], get_element(instruccion[1]) < get_element(instruccion[2]))
+			posicion += 1
+		except exception as e:
+			print(e)
+	elif instruccion[0] == ">":
+		# > , OpIzq, OpDer, Direccion_Destino
+		try:
+			assign_value(instruccion[3], get_element(instruccion[1]) > get_element(instruccion[2]))
+			posicion += 1
+		except exception as e:
+			print(e)
+	elif instruccion[0] == "==":
+		# == , OpIzq, OpDer, Direccion_Destino
+		try:
+			assign_value(instruccion[3], get_element(instruccion[1]) == get_element(instruccion[2]))
+			posicion += 1
+		except exception as e:
+			print(e)
+	elif instruccion[0] == "!=":
+		# != , OpIzq, OpDer, Direccion_Destino
+		try:
+			assign_value(instruccion[3], get_element(instruccion[1]) != get_element(instruccion[2]))
+			posicion += 1
+		except exception as e:
+			print(e)
+	elif instruccion[0] == "=":
+		# = , Direccion, , Direccion_Destino
+		try:
+			assign_value(instruccion[3], get_element(instruccion[1]) )
+			posicion += 1
+		except exception as e:
+			print(e)
 
 	elif instruccion[0] == "goto":
 		# goto , , , Cuadruplo
