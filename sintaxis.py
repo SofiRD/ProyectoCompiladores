@@ -694,6 +694,21 @@ def p_tipo(p):
 
 def p_return(p):
     'return : RETURN expresion PUNTOYCOMA'
+    global NombreFunc
+
+    tipo_c = PilaTipos[-1]
+    Resultado_expresion = PilaO[-1]
+    PilaTipos.pop()
+    PilaO.pop()
+    id_info = DirFunc["global"]["var_table"][NombreFunc]
+    id_info["tipo"] 
+    if semantico[id_info["tipo"]]["="][tipo_c] != "error" : 
+        Cuadruplos.append(['=', Resultado_expresion, " ", id_info["direccion"]])
+    else :
+        print("Error el return no es el mismo tipo de la funcion")
+
+    Cuadruplos.append(["ENDFUNC", " " , " " , " "])
+    
     p[0] = p[1]
 
 def p_bloque(p):
@@ -993,7 +1008,7 @@ def p_error(p):
 
 parser = yacc.yacc(debug = True) 
 
-code_file = open("programaTest.txt", "r")
+code_file = open("programaTest.su", "r")
 code_lines = code_file.read()
 result = parser.parse(code_lines)
 print(result)
