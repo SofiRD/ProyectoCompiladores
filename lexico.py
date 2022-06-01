@@ -27,7 +27,8 @@ reserved = {
    'true' : 'TRUE',
    'false' : 'FALSE',
    'return' : 'RETURN',
-   'end' : 'END'
+   'end' : 'END',
+   'main' : 'MAIN'
 
 }
 
