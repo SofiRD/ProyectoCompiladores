@@ -123,61 +123,60 @@ while True:
 		except exception as e:
 			print(e)
 
-	elif instruccion[0] == "<=":
-		try:
-			if(get_element(instruccion[1]) <= get_element(instruccion[2])):
-				assign_value(instruccion[3], True)
-				posicion += 1
-			else:
-				assign_value(instruccion[3], False)
-				posicion += 1
-		except exception as e:
-			print(e)
+	#elif instruccion[0] == "<=":
+	#	try:
+	#		if(get_element(instruccion[1]) <= get_element(instruccion[2])):
+	#			assign_value(instruccion[3], True)
+	#			posicion += 1
+	#		else:
+	#			assign_value(instruccion[3], False)
+	#			posicion += 1
+	#	except exception as e:
+	#		print(e)
 
-	elif instruccion[0] == ">=":
-		try:
-			if(get_element(instruccion[1]) >= get_element(instruccion[2])):
-				assign_value(instruccion[3], True)
-				posicion += 1
-			else:
-				assign_value(instruccion[3], False)
-				posicion += 1
-		except exception as e:
-			print(e)
+	#elif instruccion[0] == ">=":
+	#	try:
+	#		if(get_element(instruccion[1]) >= get_element(instruccion[2])):
+	#			assign_value(instruccion[3], True)
+	#			posicion += 1
+	#		else:
+	#			assign_value(instruccion[3], False)
+	#			posicion += 1
+	#		print(e)
 
-	elif instruccion[0] == "<":
-		try:
-			if(get_element(instruccion[1]) < get_element(instruccion[2])):
-				assign_value(instruccion[3], True)
-				posicion += 1
-			else:
-				assign_value(instruccion[3], False)
-				posicion += 1
-		except exception as e:
-			print(e)
+	#elif instruccion[0] == "<":
+	#	try:
+	#		if(get_element(instruccion[1]) < get_element(instruccion[2])):
+	#			assign_value(instruccion[3], True)
+	#			posicion += 1
+	#		else:
+	#			assign_value(instruccion[3], False)
+	#			posicion += 1
+	#	except exception as e:
+	#		print(e)
 
-	elif instruccion[0] == ">":
-		try:
-			if(get_element(instruccion[1]) <= get_element(instruccion[2])):
-				assign_value(instruccion[3], True)
-				posicion += 1
-			else:
-				assign_value(instruccion[3], False)
-				posicion += 1
-		except exception as e:
-			print(e)
+	#elif instruccion[0] == ">":
+	#	try:
+	#		if(get_element(instruccion[1]) <= get_element(instruccion[2])):
+	#			assign_value(instruccion[3], True)
+	#			posicion += 1
+	#		else:
+	#			assign_value(instruccion[3], False)
+	#			posicion += 1
+	#	except exception as e:
+	#		print(e)
 
-	elif instruccion[0] == "==":
-		try:
-			if(get_element(instruccion[1]) == get_element(instruccion[2])):
-				assign_value(instruccion[3], True)
-				posicion += 1
-			else:
-				assign_value(instruccion[3], False)
-				posicion += 1
-		except exception as e:
-			print(e)
-
+	#elif instruccion[0] == "==":
+	#	try:
+	#		if(get_element(instruccion[1]) == get_element(instruccion[2])):
+	#			assign_value(instruccion[3], True)
+	#			posicion += 1
+	#		else:
+	#			assign_value(instruccion[3], False)
+	#			posicion += 1
+	#	except exception as e:
+	#		print(e)
+	
 	elif instruccion[0] == "goto":
 		# goto , , , Cuadruplo
 		posicion = instruccion[3]
