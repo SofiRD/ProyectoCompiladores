@@ -16,6 +16,9 @@ OpStack = []
 
 #Cuadruplos
 Cuadruplos = []
+# goto al main, principio del programa
+Cuadruplos.append(["goto", " ", "main" , " "])
+
 
 #Pilas
 PilaO = []
@@ -54,9 +57,9 @@ PilaIDs = []
 #########################################
 
 
-direcciones_CTEs = {'int' : 4000 , 'float' : 4250, 'string' : 4500, 'bool' : 4750}
+direcciones_CTEs = {'int' : 4001 , 'float' : 4250, 'string' : 4500, 'bool' : 4750}
 
-TablaMemoria_CTEs = {'int' : [ ] , 'float' : [ ], 'string' : [ ], 'bool' : [True,False]}
+TablaMemoria_CTEs = {'int' : [-1] , 'float' : [ ], 'string' : [ ], 'bool' : [True,False]}
 
 semantico = {
     "int" : {
@@ -324,8 +327,37 @@ def get_ID_info(n_id):
         return DirFunc[NombreFunc]["var_table"][n_id]
 
 def p_programa(p):
-    'programa : START programa1 END'
+    'programa : START programa1 main END'
     p[0] = p[1] 
+
+def p_main(p):
+    'main : main_migaja1 MAIN LPAREN RPAREN bloque main_migaja2'
+    Cuadruplos.append(["ENDPROG", " " , " ", " "])
+    p[0] = p[1] 
+
+def p_main_migaja1(p):
+    'main_migaja1 : '
+    global NombreFunc
+    global TipoFunc
+
+    NombreFunc = "main"
+    TipoFunc = "void"
+
+    DirFunc["main"]={"nombre" : "main" , "tipo" : "void", "DirIni" : len(Cuadruplos),
+                    "var_table" : {}, "local_table" : [], "NumParam" : 0, 
+                    "NumVars" : 0, "NumTemp" : 0,
+                    "direcciones": {'int' : 1000 , 'float' : 1250, 'string' : 1500, 'bool' : 1750},
+                    "direcciones_temporales": {'int' : 3000 , 'float' : 3250, 'string' : 3500, 'bool' : 3750}}
+    Cuadruplos[0][3] = len(Cuadruplos)
+
+def p_main_migaja2(p):
+    'main_migaja2 :  '
+    global NombreFunc
+    global TipoFunc
+
+    NombreFunc = "global"
+    TipoFunc = "global"
+    
 
 def p_programa1(p):
     """programa1 : programa2 programa1
@@ -629,7 +661,7 @@ def p_usofuncion_migaja2(p):
             if semantico[tipo_declaracion]["="][tipo_uso] != "error":
                 Cuadruplos.append(["PARAM", p[1][i]["nombre"], " ", i])
             else:
-                print("Error, los tipos no se pueden operar")
+                print("Error, asignacion a parametro de tipo incompatible")
 
 def p_expresiones(p):
     """expresiones : expresion expresionesvarias
@@ -678,20 +710,23 @@ def p_escritura(p):
     'escritura : PRINT LPAREN expresion resultado RPAREN PUNTOYCOMA'
     Cuadruplos.append(['print', " ", " ", PilaO[-1]])
     PilaO.pop()
+    PilaTipos.pop()
     p[0] = p[1]
 
 def p_resultado(p):
     """resultado : COMA expresion resultado 
                     | empty"""
-    if p[0] == ',':
+    if p[1] == ',':
         Cuadruplos.append(['print', " ", " ", PilaO[-1]])
         PilaO.pop()
+        PilaTipos.pop()
     p[0] = p[1]
 
 def p_lectura(p):
     'lectura : READ LPAREN lecturaid RPAREN PUNTOYCOMA'
     Cuadruplos.append(['read', " ", " ", PilaO[-1]])
     PilaO.pop()
+    PilaTipos.pop()
     p[0] = p[1]
 
 def p_lecturaid(p):
@@ -700,7 +735,7 @@ def p_lecturaid(p):
     if id_info != False:
         PilaO.append(id_info["direccion"])
     else:
-        print("Error, el id", p[1], "no existe")
+        print("Error, la variable", p[1], "no existe")
     p[0] = p[1]
 
 def p_varids(p):
@@ -836,8 +871,23 @@ def p_multdiv(p):
 def p_factor(p):
     """factor : LPAREN factor_migaja expresion RPAREN
                 | posneg variable"""
-    #if p[1].value == "-":
-    #    pass
+    if p[1] == "-":
+        operDer = PilaO[-1]
+        PilaO.pop()
+        tipoDer = PilaTipos[-1]
+        PilaTipos.pop()
+        
+
+        tipoRes = semantico["int"]["*"][tipoDer]
+        if tipoRes != "error":
+            result = next_temp(tipoRes)
+            Cuadruplos.append(["*", 4000, operDer, result])
+            PilaO.append(result)
+            PilaTipos.append(tipoRes)
+        else:
+            print("Error, El tipo de operador es incorrecto")
+
+
     if p[1] == '(' and len(OpStack) > 0 and OpStack[-1] == '(':
         OpStack.pop()
     p[0] = p[1]
@@ -845,12 +895,13 @@ def p_factor(p):
 def p_factor_migaja(p):
     'factor_migaja : '
     OpStack.append('(')
-    p[0] = p[1]
 
 
 def p_posnegc(p):
     """posneg : sumres
                 | empty"""
+    if p[1] is not None:
+        OpStack.pop()
     p[0] = p[1]
 
 def p_variable(p):
