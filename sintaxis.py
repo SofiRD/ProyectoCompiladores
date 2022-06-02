@@ -302,6 +302,7 @@ NombreFunc = "global"
 TipoFunc = "global"
 
 UltimoTipo = "void"
+dim = 1
 
 id_temp = 0
 def next_temp(tipo_var):
@@ -826,12 +827,62 @@ def p_varids(p):
                     | empty"""
 
 def p_arreglos(p):
-    'arreglos : LBRAQUET expresion RBRAQUET masarreglos'
+    'arreglos : LBRAQUET arreglos_migaja1 RBRAQUET masarreglos'
+    info_id = get_ID_info(PilaIDs[-1])
+    Aux1 = PilaO[-1]
+    PilaO.pop()
+    Cuadruplos.append(["+", Aux1, info_id["Nodos"][dim]["m"]], result)
+    Cuadruplos.append(["+", result, info_id["direccion"], result])
+    PilaO.append(result)
+    OpStack.pop()
+
     p[0] = p[1]
 
+def p_arreglos_migaja1(p):
+    "arreglos_migaja1 : expression"
+    info_id = get_ID_info(PilaIDs[-1])
+    id = PilaO[-1]
+    PilaO.pop()
+    tipo = PilaTipos[-1]
+    PilaTipos.pop()
+
+    if(id == ""):
+        print("ERROR, el arreglo debe tener dimensiones enteras")
+    else:
+        dim = 1
+        PilaDims.append(id, dim)
+        Nodo = info_id["Nodos"][id]
+        OpStack.append(FondoFalso = [])
+        Cuadruplos.append(["VER", id, " ", Nodo["Lims"]])
+
+        if(info_id["direccion"] + 1):
+            aux = PilaO[-1]
+            PilaO.pop()
+            Cuadruplos.append("*", aux , info_id["Nodos"][dim]["m"], result)
+            PilaO.append(result)
+
+        if(dim > 1):
+            aux2 = PilaO[-1]
+            PilaO.pop()
+            aux1 = PilaO[-1]
+            PilaO.pop()
+            Cuadruplos.append("+", aux1 , aux2, result)
+            PilaO.append(result)
+    
+
 def p_masarreglos(p):
-    """masarreglos : arreglos 
+    """masarreglos : masarreglos_migaja1 arreglos 
                     | empty"""
+    p[0] = p[1]
+
+def p_masarreglos_migaja1(p):
+    'masarreglos_migaja1 : '
+    info_id = get_ID_info(PilaIDs[-1])
+    dim += 1
+    PilaDims.append(dim)
+    Nodo = info_id["Nodos"][id + 1]
+
+
 
 def p_expresion(p):
     'expresion : aritmetica expresion_migaja comparitmetica'
