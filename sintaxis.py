@@ -2,7 +2,7 @@
 # Sofia Recinos Dorst  A01657055
 # Ulrich Nuño Tapia  A00821805
 
-from curses import ERR
+import ply
 from distutils.log import ERROR
 import ply.yacc as yacc
 
@@ -25,6 +25,9 @@ PilaO = []
 PilaTipos = []
 PilaSaltos = []
 PilaIDs = []
+PilaDims = []
+Limi = []
+Lims = []
 
 # Directorio de funciones
 # Globales: 0 - 2000
@@ -58,6 +61,8 @@ PilaIDs = []
 
 
 direcciones_CTEs = {'int' : 4001 , 'float' : 4250, 'string' : 4500, 'bool' : 4750}
+
+direcciones_Arreglos = {'Arr' : 5001}
 
 TablaMemoria_CTEs = {'int' : [-1] , 'float' : [ ], 'string' : [ ], 'bool' : [True,False]}
 
@@ -296,6 +301,8 @@ semantico = {
 NombreFunc = "global"
 TipoFunc = "global"
 
+UltimoTipo = "void"
+
 id_temp = 0
 def next_temp(tipo_var):
     dir_temp = DirFunc[NombreFunc]["direcciones_temporales"][tipo_var]
@@ -410,7 +417,7 @@ def p_decfuncion_migaja1(p):
                                                     'tipo' : p[1],
                                                     'direccion' : DirFunc["global"]["direcciones"][p[1]]}
             DirFunc["global"]["direcciones"][p[1]] += 1
-    p[0] = p[1]  
+    p[0] = p[1]
 
 
 # NECESITO leer la variable
@@ -441,6 +448,9 @@ def p_parametro_migaja1(p):
 
     global NombreFunc
     global TipoFunc
+    global UltimoTipo
+
+    UltimoTipo = p[1]
 
     if p[2] in DirFunc[NombreFunc]["var_table"] :
         print("Error, el parametro ", p[2], "ya había sido declarado")
@@ -454,25 +464,83 @@ def p_parametro_migaja1(p):
         DirFunc[NombreFunc]["direcciones"][p[1]] += 1
     p[0] = p[1]
 
-
 def p_parametros(p):
     """parametros : COMA parametro_migaja1 parametros 
                     | empty"""
     p[0] = p[1]
 
-
 def p_decid(p):
-    'decid : ID decarreglo'
+    'decid : decid_migaja1 decarreglo'
+    PilaIDs.pop()
+    p[0] = p[1]
+
+def p_decid_migaja1(p):
+    'decid_migaja1 : ID'
+    global NombreFunc
+    global UltimoTipo
+    DirFunc[NombreFunc]["var_table"][UltimoTipo] = {'nombre' : p[2],
+                                            'tipo' : p[1],
+                                            'direccion' : DirFunc[NombreFunc]["direcciones"][p[1]]}
+    DirFunc[NombreFunc]["direcciones"][p[1]] += 1
+    PilaIDs.append(p[1])
     p[0] = p[1]
 
 def p_decarreglo(p):
-    """decarreglo : LBRAQUET INTT RBRAQUET decarreglo 
-                    | empty"""
+    """decarreglo : decarreglo_migaja1 decarreglo_migaja2 dec_arreglo_migajadefinitiva_ultrasonica_sayayin 
+                            | empty"""
     p[0] = p[1]
 
-def p_clase(p):
-    'clase : CLASS ID bloqueclase'
+def p_dec_arreglo_migajadefinitiva_ultrasonica_sayayin(p):
+    "dec_arreglo_migajadefinitiva_ultrasonica_sayayin : "
+    global NombreFunc
+    global UltimoTipo
+    info_id = get_ID_info(PilaIDs[-1])
+    Offset = 0
+    size = info_id["R"]
+    for nodo in info_id["Nodos"]:
+        nodo["m"] = info_id["R"] / (nodo["Lims"] - nodo["Limi"] + 1)
+        info_id["R"] = nodo["m"]
+        Offset += nodo["Limi"] * nodo["m"]
+    K = Offset
+    info_id["Nodos"][-1]["m"] = - K
+    info_id["size"] = size
+    info_id["Virtual_address"] = info_id["direccion"]
+    DirFunc[NombreFunc]["direcciones"][UltimoTipo] += size - 1
+
+
+def p_decarreglo_migaja2(p):
+    "decarreglo_migaja2 : decarreglo_migaja3 LBRAQUET decarreglo_migaja4 RBRAQUET masdecarreglos"
+
+def p_masdecarreglos(p):
+    """masdecarreglos : decarreglo_migaja3 LBRAQUET decarreglo_migaja4 RBRAQUET masdecarreglos
+                   | empty """
+
+def p_decarreglo_migaja1(p):
+    "decarreglo_migaja1 : "
+    info_id = get_ID_info(PilaIDs[-1])
+    info_id["isArray"] = True
+    info_id["dim"] = 0
+    info_id["R"] = 1
+    info_id["Nodos"] = []
+
+def p_decarreglo_migaja4(p):
+    "decarreglo_migaja4 : INTT"
+    info_id = get_ID_info(PilaIDs[-1])
+    info_id["Nodos"][-1]["Lims"] = p[1]
+    PilaO.pop()
+    PilaTipos.pop()
+    info_id["R"] *= (p[1] - 0 + 1)
+
     p[0] = p[1]
+
+def p_decarreglo_migaja3(p):
+    "decarreglo_migaja3 : decarreglo"
+    info_id = get_ID_info(PilaIDs[-1])
+    info_id["dim"] += 1
+    info_id["Nodos"].append({"Limi": 0,
+                            "Lims": 0,
+                            "m": 0})
+
 
 def p_bloqueclase(p):
     'bloqueclase : LCORCHETE funcyvarrec RCORCHETE'
@@ -501,6 +569,8 @@ def p_instruccion(p):
 
 def p_decvariable(p):
     'decvariable : tipo ids PUNTOYCOMA'
+    global UltimoTipo
+    UltimoTipo = p[1]
     for var_name in p[2]:
         if var_name in DirFunc["global"]["var_table"]:
             print("Error, la variable", var_name, "ya había sido declarada")
@@ -635,8 +705,6 @@ def p_asignacion_migaja1(p):
     id_info = get_ID_info(PilaIDs[-1])
     if id_info == False :
         print("Error, la variable", PilaIDs[-1],"no existe ")
-
-
 
 def p_usofuncion(p):
     'usofuncion : usofuncion_migaja1 LPAREN usofuncion_migaja2 RPAREN PUNTOYCOMA'
