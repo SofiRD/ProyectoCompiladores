@@ -1,5 +1,5 @@
 # Sofia Recinos Dorst  A01657055
-# Ulrich Nuño Tapia  A00821805
+# Ulrik Nuño Tapia  A00821805
 
 from sintaxis import Cuadruplos
 from sintaxis import DirFunc
@@ -169,56 +169,56 @@ while True:
 		try:
 			assign_value(instruccion[3], get_element(instruccion[1]) + get_element(instruccion[2]))
 			posicion += 1
-		except exception as e:
+		except Exception as e:
 			print(e)
 	elif instruccion[0] == "-":
 		# - , OpIzq, OpDer, Direccion_Destino
 		try:
 			assign_value(instruccion[3], get_element(instruccion[1]) - get_element(instruccion[2]))
 			posicion += 1
-		except exception as e:
+		except Exception as e:
 			print(e)
 	elif instruccion[0] == "*":
 		# * , OpIzq, OpDer, Direccion_Destino
 		try:
 			assign_value(instruccion[3], get_element(instruccion[1]) * get_element(instruccion[2]))
 			posicion += 1
-		except exception as e:
+		except Exception as e:
 			print(e)
 	elif instruccion[0] == "/":
 		# / , OpIzq, OpDer, Direccion_Destino
 		try:
 			assign_value(instruccion[3], get_element(instruccion[1]) / get_element(instruccion[2]))
 			posicion += 1
-		except exception as e:
+		except Exception as e:
 			print(e)
 	elif instruccion[0] == "<":
 		# < , OpIzq, OpDer, Direccion_Destino
 		try:
 			assign_value(instruccion[3], get_element(instruccion[1]) < get_element(instruccion[2]))
 			posicion += 1
-		except exception as e:
+		except Exception as e:
 			print(e)
 	elif instruccion[0] == ">":
 		# > , OpIzq, OpDer, Direccion_Destino
 		try:
 			assign_value(instruccion[3], get_element(instruccion[1]) > get_element(instruccion[2]))
 			posicion += 1
-		except exception as e:
+		except Exception as e:
 			print(e)
 	elif instruccion[0] == "==":
 		# == , OpIzq, OpDer, Direccion_Destino
 		try:
 			assign_value(instruccion[3], get_element(instruccion[1]) == get_element(instruccion[2]))
 			posicion += 1
-		except exception as e:
+		except Exception as e:
 			print(e)
 	elif instruccion[0] == "!=":
 		# != , OpIzq, OpDer, Direccion_Destino
 		try:
 			assign_value(instruccion[3], get_element(instruccion[1]) != get_element(instruccion[2]))
 			posicion += 1
-		except exception as e:
+		except Exception as e:
 			print(e)
 	elif instruccion[0] == "=":
 		# = , Direccion, , Direccion_Destino
@@ -226,7 +226,7 @@ while True:
 			print(get_element(instruccion[1]), pilaTablaMemoria_Locales)
 			assign_value(instruccion[3], get_element(instruccion[1]) )
 			posicion += 1
-		except exception as e:
+		except Exception as e:
 			print(e)
 
 	elif instruccion[0] == "goto":
@@ -294,7 +294,7 @@ while True:
 					print("Error")
 					Nameinput = False
 			assign_value(instruccion[3], Nameinput)
-		except exception as e:
+		except Exception as e:
 			print(e)
 		posicion += 1
 
