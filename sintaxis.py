@@ -1,6 +1,6 @@
 #
 # Sofia Recinos Dorst  A01657055
-# Ulrich Nuño Tapia  A00821805
+# Ulrik Nuño Tapia  A00821805
 
 from curses import ERR
 from distutils.log import ERROR
@@ -451,7 +451,7 @@ def p_parametro_migaja1(p):
     global TipoFunc
     
 
-    if p[2] in DirFunc[NombreFunc]["var_table"] :
+    if p[2][0] in DirFunc[NombreFunc]["var_table"] :
         print("Error, el parametro ", p[2], "ya había sido declarado")
     else :
         DirFunc[NombreFunc]["var_table"][p[2]] = {'nombre' : p[2],
@@ -477,16 +477,9 @@ def p_parametros(p):
 
 def p_decid(p):
     'decid : decid_migaja1 decarreglo'
-    global NombreFunc
-    global UltimoTipo
-    
-    DirFunc[NombreFunc]["var_table"][p[1]] = {'nombre' : PilaIDs[-1],
-                                             'tipo' : UltimoTipo,
-                                             'direccion' : DirFunc[NombreFunc]["direcciones"][UltimoTipo]}
-    DirFunc[NombreFunc]["direcciones"][UltimoTipo] += 1
-    
+
+    p[0] = (PilaIDs[-1], p[2])
     PilaIDs.pop()
-    p[0] = p[1]
 
 def p_decid_migaja1(p):
     'decid_migaja1 : ID'
@@ -530,6 +523,7 @@ def p_decarreglo_migaja1(p):
     info_id["dim"] = 0
     info_id["R"] = 1
     info_id["Nodos"] = []
+    p[0] = "["
 
 def p_decarreglo_migaja4(p):
     "decarreglo_migaja4 : INTT"
@@ -581,7 +575,7 @@ def p_instruccion(p):
 def p_decvariable(p):
     'decvariable : guarda_tipo ids PUNTOYCOMA'
     global NombreFunc
-    for var_name in p[2]:
+    for var_name, is_arr in p[2]:
         if var_name in DirFunc[NombreFunc]["var_table"]:
             print("Error, la variable", var_name, "ya había sido declarada")
         else:
@@ -861,6 +855,7 @@ def p_arreglos(p):
     Cuadruplos.append(["+", Dir_Pos_Arr, info_id["direccion"], Dir_Pos_Arr_Final])
     PilaO.append(Dir_Pos_Arr_Final)
     PilaTipos.append(info_id["tipo"])
+    PilaDims.pop()
     OpStack.pop()
     p[0] = '['
 
