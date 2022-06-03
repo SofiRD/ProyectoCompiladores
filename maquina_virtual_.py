@@ -18,7 +18,7 @@ TablaMemoria_tempGlobales = {'int' : [0]* (DirFunc["global"]["direcciones_tempor
 pilaTablaMemoria_Locales = [] 
 pilaTablaMemoria_Locales_temp = [] 
 
-PilaFunciones = []
+PilaFunciones = [ ]
 
 PilaPosiciones = [ ]
 
@@ -223,6 +223,7 @@ while True:
 	elif instruccion[0] == "=":
 		# = , Direccion, , Direccion_Destino
 		try:
+			print(get_element(instruccion[1]), pilaTablaMemoria_Locales)
 			assign_value(instruccion[3], get_element(instruccion[1]) )
 			posicion += 1
 		except exception as e:
@@ -247,9 +248,9 @@ while True:
 			posicion += 1
 
 	elif instruccion[0] == "GOSUB" :
-		#GOSUB, , , name
+		#GOSUB, name, , Dirini
 		PilaPosiciones.append(posicion + 1)
-		posicion = DirFunc[instruccion[3]]["DirIni"]
+		posicion = instruccion[3]
 		GoSub()
 
 	elif instruccion[0] == "ERA" :
