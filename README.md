@@ -14,3 +14,5 @@ Semana 6: Se generó el código de funciones y también se planeó y codificó e
 Semana 7: Se terminó de codificar la llamada a funciones, conjunto con sus cuadruplos y se comenzo a programar la maquina virtual.
 
 Semana 8: Se asignaron los espacios de memoria en la sintaxis. Se adelanto una gran parte de la maquina virtual. Falta: Arreglos en sintaxis y terminar maquina virtual. Faltan pruebas de compilación de la maquina virtual. Y finalmente se adelantó a la documentación final.
+
+Semana 9: Se avanzó significativamente en la documentación final del proyecto. Se juntó la parte de código que tenia arreglos junto con el resto de código y se comenzaron a hacer pruebas y corregir errores
