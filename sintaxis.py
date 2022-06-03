@@ -9,10 +9,7 @@ import ply.yacc as yacc
 # Get the token map from the lexer.  This is required.
 from lexico import tokens
 
-#Vector Polaco
-#VP = []
 OpStack = []
-#VarStack = []
 
 #Cuadruplos
 Cuadruplos = []
@@ -25,6 +22,9 @@ PilaO = []
 PilaTipos = []
 PilaSaltos = []
 PilaIDs = []
+
+
+PilaDims = []
 
 # Directorio de funciones
 # Globales: 0 - 2000
@@ -412,7 +412,7 @@ def p_decfuncion_migaja1(p):
                      "NumVars" : 0, "NumTemp" : 0, "tiene_return" : False,
                      "direcciones": {'int' : 1000 , 'float' : 1250, 'string' : 1500, 'bool' : 1750},
                      "direcciones_temporales": {'int' : 3000 , 'float' : 3250, 'string' : 3500, 'bool' : 3750}}
-        if p[1] is not "void" :
+        if p[1] != "void" :
             DirFunc["global"]["var_table"][p[2]] = {'nombre' : p[2],
                                                     'tipo' : p[1],
                                                     'direccion' : DirFunc["global"]["direcciones"][p[1]]}
@@ -442,15 +442,14 @@ def p_parametro(p):
                     | empty"""
     p[0] = p[1]
 
+
 # NECESITO leer la variable
 def p_parametro_migaja1(p):
-    'parametro_migaja1 : tipo decid'
+    'parametro_migaja1 : guarda_tipo decid'
 
     global NombreFunc
     global TipoFunc
-    global UltimoTipo
-
-    UltimoTipo = p[1]
+    
 
     if p[2] in DirFunc[NombreFunc]["var_table"] :
         print("Error, el parametro ", p[2], "ya había sido declarado")
@@ -465,6 +464,11 @@ def p_parametro_migaja1(p):
     p[0] = p[1]
 
 
+def p_guarda_tipo(p):
+    'guarda_tipo : tipo'
+    global UltimoTipo
+    UltimoTipo = p[1]
+
 def p_parametros(p):
     """parametros : COMA parametro_migaja1 parametros 
                     | empty"""
@@ -473,36 +477,38 @@ def p_parametros(p):
 
 def p_decid(p):
     'decid : decid_migaja1 decarreglo'
+    global NombreFunc
+    global UltimoTipo
+    
+    DirFunc[NombreFunc]["var_table"][p[1]] = {'nombre' : PilaIDs[-1],
+                                             'tipo' : UltimoTipo,
+                                             'direccion' : DirFunc[NombreFunc]["direcciones"][UltimoTipo]}
+    DirFunc[NombreFunc]["direcciones"][UltimoTipo] += 1
+    
     PilaIDs.pop()
     p[0] = p[1]
 
 def p_decid_migaja1(p):
     'decid_migaja1 : ID'
-    global NombreFunc
-    global UltimoTipo
-    DirFunc[NombreFunc]["var_table"][UltimoTipo] = {'nombre' : p[2],
-                                             'tipo' : p[1],
-                                             'direccion' : DirFunc[NombreFunc]["direcciones"][p[1]]}
-    DirFunc[NombreFunc]["direcciones"][p[1]] += 1
     PilaIDs.append(p[1])
     p[0] = p[1]
 
 def p_decarreglo(p):
-    """decarreglo : decarreglo_migaja1 decarreglo_migaja2 dec_arreglo_migajadefinitiva_ultrasonica_sayayin
+    """decarreglo : decarreglo_migaja1 decarreglo_migaja2 decarreglo_migaja3
                     | empty"""
     p[0] = p[1]
 
-def p_dec_arreglo_migajadefinitiva_ultrasonica_sayayin(p):
-     "dec_arreglo_migajadefinitiva_ultrasonica_sayayin : "
+def p_decarreglo_migaja3(p):
+     "decarreglo_migaja3 : "
      global NombreFunc
      global UltimoTipo
      info_id = get_ID_info(PilaIDs[-1])
      Offset = 0
      size = info_id["R"]
      for nodo in info_id["Nodos"]:
-         nodo["m"] = info_id["R"] / (nodo["Lims"] - nodo["Limi"] + 1)
+         nodo["m"] = info_id["R"] / (nodo["LimSup"] - nodo["LimInf"] + 1)
          info_id["R"] = nodo["m"]
-         Offset += nodo["Limi"] * nodo["m"]
+         Offset += nodo["LimInf"] * nodo["m"]
      K = Offset
      info_id["Nodos"][-1]["m"] = - K
      info_id["size"] = size
@@ -511,10 +517,10 @@ def p_dec_arreglo_migajadefinitiva_ultrasonica_sayayin(p):
 
 
 def p_decarreglo_migaja2(p):
-    "decarreglo_migaja2 : decarreglo_migaja3 LBRAQUET decarreglo_migaja4 RBRAQUET masdecarreglos"
+    "decarreglo_migaja2 : LBRAQUET decarreglo_migaja3 decarreglo_migaja4 RBRAQUET masdecarreglos"
 
 def p_masdecarreglos(p):
-    """masdecarreglos : decarreglo_migaja3 LBRAQUET decarreglo_migaja4 RBRAQUET masdecarreglos
+    """masdecarreglos : masdecarreglo_migaja3 LBRAQUET decarreglo_migaja4 RBRAQUET masdecarreglos
                    | empty """
 
 def p_decarreglo_migaja1(p):
@@ -528,19 +534,19 @@ def p_decarreglo_migaja1(p):
 def p_decarreglo_migaja4(p):
     "decarreglo_migaja4 : INTT"
     info_id = get_ID_info(PilaIDs[-1])
-    info_id["Nodos"][-1]["Lims"] = p[1]
+    info_id["Nodos"][-1]["LimSup"] = p[1]
     PilaO.pop()
     PilaTipos.pop()
     info_id["R"] *= (p[1] - 0 + 1)
 
     p[0] = p[1]
 
-def p_decarreglo_migaja3(p):
-    "decarreglo_migaja3 : decarreglo"
+def p_masdecarreglo_migaja3(p):
+    "masdecarreglo_migaja3 : decarreglo"
     info_id = get_ID_info(PilaIDs[-1])
     info_id["dim"] += 1
-    info_id["Nodos"].append({"Limi": 0,
-                             "Lims": 0,
+    info_id["Nodos"].append({"LimInf": 0,
+                             "LimSup": 0,
                              "m": 0})
 
 def p_clase(p):
@@ -573,10 +579,8 @@ def p_instruccion(p):
     p[0] = p[1]
 
 def p_decvariable(p):
-    'decvariable : tipo ids PUNTOYCOMA'
+    'decvariable : guarda_tipo ids PUNTOYCOMA'
     global NombreFunc
-    global UltimoTipo
-    UltimoTipo = p[1]
     for var_name in p[2]:
         if var_name in DirFunc[NombreFunc]["var_table"]:
             print("Error, la variable", var_name, "ya había sido declarada")
@@ -806,19 +810,18 @@ def p_instrucciones(p):
 
 
 def p_escritura(p):
-    'escritura : PRINT LPAREN expresion resultado RPAREN PUNTOYCOMA'
+    'escritura : PRINT LPAREN expresion escritura_migaja1 resultado RPAREN PUNTOYCOMA'
+    p[0] = p[1]
+
+def p_escritura_migaja1(p):
+    'escritura_migaja1 : '
     Cuadruplos.append(['print', " ", " ", PilaO[-1]])
     PilaO.pop()
     PilaTipos.pop()
-    p[0] = p[1]
 
 def p_resultado(p):
-    """resultado : COMA expresion resultado 
+    """resultado : COMA expresion escritura_migaja1 resultado 
                     | empty"""
-    if p[1] == ',':
-        Cuadruplos.append(['print', " ", " ", PilaO[-1]])
-        PilaO.pop()
-        PilaTipos.pop()
     p[0] = p[1]
 
 def p_lectura(p):
@@ -829,60 +832,72 @@ def p_lectura(p):
     p[0] = p[1]
 
 def p_lecturaid(p):
-    'lecturaid : ID  varids'
-    id_info = get_ID_info(p[1])
-    if id_info != False:
-        PilaO.append(id_info["direccion"])
-    else:
-        print("Error, la variable", p[1], "no existe")
+    'lecturaid : lecturaid_migaja1 varids'
+    if p[2] is not None:
+        id_info = get_ID_info(p[1])
+        if id_info != False:
+            PilaO.append(id_info["direccion"])
+            PilaTipos.append(id_info["tipo"])
+        else:
+            print("Error, la variable", p[1], "no existe")
     p[0] = p[1]
+
+def p_lecturaid_migaja1(p) :
+    'lecturaid_migaja1 : ID'
+    PilaIDs.append(p[1])
 
 def p_varids(p):
     """varids : arreglos 
                     | empty"""
 
 def p_arreglos(p):
-    'arreglos : LBRAQUET arreglos_migaja1 RBRAQUET masarreglos'
+    'arreglos : arreglos_migaja1 LBRAQUET expresion arreglos_migaja2 RBRAQUET masarreglos'
     info_id = get_ID_info(PilaIDs[-1])
     Aux1 = PilaO[-1]
     PilaO.pop()
-    Cuadruplos.append(["+", Aux1, info_id["Nodos"][dim]["m"]], result)
-    Cuadruplos.append(["+", result, info_id["direccion"], result])
-    PilaO.append(result)
+    Dir_Pos_Arr = next_temp("int")
+    Cuadruplos.append(["+", Aux1, info_id["Nodos"][-1]["m"]], Dir_Pos_Arr)
+    Dir_Pos_Arr_Final = next_temp("int")
+    Cuadruplos.append(["+", Dir_Pos_Arr, info_id["direccion"], Dir_Pos_Arr_Final])
+    PilaO.append(Dir_Pos_Arr_Final)
+    PilaTipos.append(info_id["tipo"])
     OpStack.pop()
-    p[0] = p[1]
+    p[0] = '['
 
 def p_arreglos_migaja1(p):
-     "arreglos_migaja1 : expresion"
-     info_id = get_ID_info(PilaIDs[-1])
-     id = PilaO[-1]
-     PilaO.pop()
-     tipo = PilaTipos[-1]
-     PilaTipos.pop()
+    "arreglos_migaja1 : "
+    dim = 1
+    PilaDims.append([PilaIDs[-1], dim])
 
-     if(id == ""):
-         print("ERROR, el arreglo debe tener dimensiones enteras")
-     else:
-         dim = 1
-         PilaDims.append(id, dim)
-         Nodo = info_id["Nodos"][id]
-         OpStack.append(FondoFalso = [])
-         Cuadruplos.append(["VER", id, " ", Nodo["Lims"]])
+def p_arreglos_migaja2(p):
+    "arreglos_migaja2 : "
+    info_id = get_ID_info(PilaIDs[-1])
+ 
+    if info_id["isArray"]:
+        curr_dim = PilaDims[-1][1] - 1 
+        Nodo = info_id["Nodos"][curr_dim]
+        OpStack.append("[")
+        Cuadruplos.append(["VER", PilaO[-1], Nodo["LimInf"], Nodo["LimSup"]])
 
-         if(info_id["direccion"] + 1):
-             aux = PilaO[-1]
-             PilaO.pop()
-             Cuadruplos.append("*", aux , info_id["Nodos"][dim]["m"], result)
-             PilaO.append(result)
+        if curr_dim + 1 < info_id["dim"]:
+            if PilaTipos[-1] != "int":
+                print("ERROR, las dimensiones de los arreglos deben de ser enteras")
+            aux = PilaO[-1]
+            PilaO.pop()
+            s1m1 = next_temp("int")
+            Cuadruplos.append("*", aux , Nodo["m"], s1m1)
+            PilaO.append(s1m1)
 
-         if(dim > 1):
-             aux2 = PilaO[-1]
-             PilaO.pop()
-             aux1 = PilaO[-1]
-             PilaO.pop()
-             Cuadruplos.append("+", aux1 , aux2, result)
-             PilaO.append(result)
-
+        if(curr_dim > 1):
+            aux2 = PilaO[-1]
+            PilaO.pop()
+            aux1 = PilaO[-1]
+            PilaO.pop()
+            val_k = next_temp("int")
+            Cuadruplos.append("+", aux1 , aux2, val_k)
+            PilaO.append(val_k)
+    else:
+        print("ERROR, el arreglo debe tener dimensiones enteras")
 
 def p_masarreglos(p):
     """masarreglos : masarreglos_migaja1 arreglos 
@@ -892,9 +907,7 @@ def p_masarreglos(p):
 def p_masarreglos_migaja1(p):
     'masarreglos_migaja1 : '
     info_id = get_ID_info(PilaIDs[-1])
-    dim += 1
-    PilaDims.append(dim)
-    Nodo = info_id["Nodos"][id + 1]
+    PilaDims[-1][1] += 1
 
 def p_expresion(p):
     'expresion : aritmetica expresion_migaja comparitmetica'
