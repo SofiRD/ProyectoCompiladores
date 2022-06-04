@@ -1,14 +1,14 @@
 # Sofia Recinos Dorst  A01657055
 # Ulrik Nuño Tapia  A00821805
 
-from sintaxis import Cuadruplos
 from sintaxis import DirFunc
 from sintaxis import TablaMemoria_CTEs
 
 TablaMemoria_globales = {'int' : [0]* DirFunc["global"]["direcciones"]["int"], 
 							'float' : [0]* (DirFunc["global"]["direcciones"]["float"] - 250), 
 							'string' : [""]* (DirFunc["global"]["direcciones"]["string"] - 500), 
-							'bool' : [False]* (DirFunc["global"]["direcciones"]["bool"] - 750)}
+							'bool' : [False]* (DirFunc["global"]["direcciones"]["bool"] - 750),
+							'arr' : [-1]* (DirFunc["global"]["direcciones"]["arr"] - 5000)}
 
 TablaMemoria_tempGlobales = {'int' : [0]* (DirFunc["global"]["direcciones_temporales"]["int"]-2000), 
 							'float' : [0]* (DirFunc["global"]["direcciones_temporales"]["float"] - 2250), 
@@ -22,9 +22,26 @@ PilaFunciones = [ ]
 
 PilaPosiciones = [ ]
 
-print(Cuadruplos)
-
-
+print(DirFunc)
+Cuadruplos = []
+file_name = "programaTest.su"
+ 
+with open(file_name+'.obj','r') as fileobj:   
+ while(True):  
+  
+  line = fileobj.readline()
+  if not line:
+   break;
+  line = line.strip()[1:-1]
+  line_parts = line.split(', ')
+  cuadruplo_final = []
+  for i in line_parts:
+    if i[0] == "'":
+      cuadruplo_final.append(i[1:-1])
+    else:
+      cuadruplo_final.append(int(i))
+  Cuadruplos.append(cuadruplo_final)
+print('de archivoooo', Cuadruplos)
 # Directorio de funciones
 # Globales: 0 - 2000
 #   int 0 - 250
@@ -80,7 +97,6 @@ def get_element(direccion):
 	tipo_memoria = direccion//1000
 	tipo = get_tipo_dir(direccion)
 	posicion = get_posicion_dir(direccion)
-
 	if tipo_memoria == 0 :
 		return TablaMemoria_globales[tipo][posicion]
 	if tipo_memoria == 1 :
@@ -91,7 +107,13 @@ def get_element(direccion):
 		return pilaTablaMemoria_Locales_temp[-1][tipo][posicion]
 	if tipo_memoria == 4 :
 		return TablaMemoria_CTEs[tipo][posicion]
-
+	if tipo_memoria == 5 :
+                if direccion-5000 < 250:
+                    return get_element(TablaMemoria_globales['arr'][direccion-5000])
+                else:
+                    print(TablaMemoria_globales)
+                    print(get_element(pilaTablaMemoria_Locales[-1]['arr'][direccion-5250]), pilaTablaMemoria_Locales[-1]['arr'][direccion-5250])
+                    return get_element(pilaTablaMemoria_Locales[-1]['arr'][direccion-5250])
 
 def assign_value(direccion, value):
 	tipo_memoria = direccion//1000
@@ -109,6 +131,35 @@ def assign_value(direccion, value):
 		pilaTablaMemoria_Locales_temp[-1][tipo][posicion] = value
 	if tipo_memoria == 4 :
 		TablaMemoria_CTEs[tipo][posicion] = value 
+	if tipo_memoria == 5 :
+                if direccion-5000 < 250:
+                    assign_value(TablaMemoria_globales['arr'][direccion-5000], value)
+                else:
+                    print("real", pilaTablaMemoria_Locales[-1]['arr'][direccion-5250])
+                    assign_value(pilaTablaMemoria_Locales[-1]['arr'][direccion-5250], value)
+
+def direct_assign_value(direccion, value):
+	tipo_memoria = direccion//1000
+	tipo = get_tipo_dir(direccion)
+	posicion = get_posicion_dir(direccion)
+
+	if tipo_memoria == 0 :
+		TablaMemoria_globales[tipo][posicion] = value
+	if tipo_memoria == 1 :
+		pilaTablaMemoria_Locales[-1][tipo][posicion] = value
+	if tipo_memoria == 2 :
+		TablaMemoria_tempGlobales[tipo][posicion] = value
+	if tipo_memoria == 3 :
+		#print(pilaTablaMemoria_Locales_temp[-1],[tipo],[posicion])
+		pilaTablaMemoria_Locales_temp[-1][tipo][posicion] = value
+	if tipo_memoria == 4 :
+		TablaMemoria_CTEs[tipo][posicion] = value 
+	if tipo_memoria == 5 :
+                if direccion-5000 < 250:
+                    TablaMemoria_globales['arr'][direccion-5000] = int(value)
+                else:
+                    pilaTablaMemoria_Locales[-1]['arr'][direccion-5250] = int(value)
+
 
 def assign_parametro(direccion, value):
 	tipo_memoria = direccion//1000
@@ -125,7 +176,11 @@ def assign_parametro(direccion, value):
 		sig_TablaMemoria_Locales_temp[tipo][posicion] = value
 	if tipo_memoria == 4 :
 		TablaMemoria_CTEs[tipo][posicion] = value 
-	
+	if tipo_memoria == 5 :
+                if direccion-5000 < 250:
+                    return get_element(TablaMemoria_globales['arr'][direccion-5000])
+                else:
+                    return get_element(sig_TablaMemoria_Locales['arr'][direccion-5250])
 
 
 sig_TablaMemoria_Locales = { }
@@ -140,7 +195,8 @@ def Era(nameFunction):
 	sig_TablaMemoria_Locales = {'int' : [0]*(info_funcion["direcciones"]["int"]-1000), 
     								'float' : [0]*(info_funcion["direcciones"]["float"]-1250), 
     								'string' : [""]*(info_funcion["direcciones"]["string"]-1500), 
-    								'bool' : [False]*(info_funcion["direcciones"]["bool"]-1750)}
+    								'bool' : [False]*(info_funcion["direcciones"]["bool"]-1750) ,
+    								'arr' : [0]*(info_funcion["direcciones"]["arr"]-5250)}
 
 	sig_TablaMemoria_Locales_temp = {'int' : [0]*(info_funcion["direcciones_temporales"]["int"]-3000) , 
     								'float' : [0]*(info_funcion["direcciones_temporales"]["float"]-3250), 
@@ -163,7 +219,7 @@ GoSub()
 
 while True:
 	instruccion = Cuadruplos[posicion]
-	print(instruccion)
+	#print(instruccion)
 	if instruccion[0] == "+":
 		# + , OpIzq, OpDer, Direccion_Destino
 		try:
@@ -175,7 +231,16 @@ while True:
 	elif instruccion[0] == "+2":
 		# +2 , OpIzq, OpDer(Directo), Direccion_Destino
 		try:
-			assign_value(instruccion[3], get_element(instruccion[1]) + instruccion[2])
+			print(instruccion[3], get_element(instruccion[1]), instruccion[2])
+			direct_assign_value(instruccion[3], get_element(instruccion[1]) + instruccion[2])
+			posicion += 1
+		except Exception as e:
+			print(e)
+
+	elif instruccion[0] == "*2":
+		# *2 , OpIzq, OpDer(Directo), Direccion_Destino
+		try:
+			assign_value(instruccion[3], get_element(instruccion[1]) * instruccion[2])
 			posicion += 1
 		except Exception as e:
 			print(e)
