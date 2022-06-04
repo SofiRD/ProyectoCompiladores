@@ -111,8 +111,7 @@ def get_element(direccion):
                 if direccion-5000 < 250:
                     return get_element(TablaMemoria_globales['arr'][direccion-5000])
                 else:
-                    print(TablaMemoria_globales)
-                    print(get_element(pilaTablaMemoria_Locales[-1]['arr'][direccion-5250]), pilaTablaMemoria_Locales[-1]['arr'][direccion-5250])
+                    print("real::", pilaTablaMemoria_Locales[-1]['arr'][direccion-5250])
                     return get_element(pilaTablaMemoria_Locales[-1]['arr'][direccion-5250])
 
 def assign_value(direccion, value):
@@ -135,7 +134,7 @@ def assign_value(direccion, value):
                 if direccion-5000 < 250:
                     assign_value(TablaMemoria_globales['arr'][direccion-5000], value)
                 else:
-                    print("real", pilaTablaMemoria_Locales[-1]['arr'][direccion-5250])
+                    print("real:::", pilaTablaMemoria_Locales[-1]['arr'][direccion-5250])
                     assign_value(pilaTablaMemoria_Locales[-1]['arr'][direccion-5250], value)
 
 def direct_assign_value(direccion, value):
@@ -231,7 +230,6 @@ while True:
 	elif instruccion[0] == "+2":
 		# +2 , OpIzq, OpDer(Directo), Direccion_Destino
 		try:
-			print(instruccion[3], get_element(instruccion[1]), instruccion[2])
 			direct_assign_value(instruccion[3], get_element(instruccion[1]) + instruccion[2])
 			posicion += 1
 		except Exception as e:
@@ -374,6 +372,7 @@ while True:
 				else:
 					print("Error")
 					Nameinput = False
+			print(instruccion, Nameinput)
 			assign_value(instruccion[3], Nameinput)
 		except Exception as e:
 			print(e)
