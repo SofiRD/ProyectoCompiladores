@@ -858,6 +858,7 @@ def p_lectura(p):
 
 def p_lecturaid(p):
     'lecturaid : lecturaid_migaja1 varids'
+    print("p2", p[2])
     if p[2] is None:
         id_info = get_ID_info(PilaIDs[-1])
         if id_info != False:
@@ -874,6 +875,7 @@ def p_lecturaid_migaja1(p) :
 def p_varids(p):
     """varids : arreglos 
                     | empty"""
+    p[0] = p[1]
 
 def p_arreglos(p):
     'arreglos : arreglos_migaja1 arreglos2'
@@ -881,7 +883,7 @@ def p_arreglos(p):
     Aux1 = PilaO[-1]
     PilaO.pop()
     Dir_Pos_Arr = next_temp("int")
-    Cuadruplos.append(["+2", Aux1, info_id["Nodos"][-1]["m"], Dir_Pos_Arr])
+    Cuadruplos.append(["+2", Aux1, int(info_id["Nodos"][-1]["m"]), Dir_Pos_Arr])
     Dir_Pos_Arr_Final = next_arr()
     Cuadruplos.append(["+2", Dir_Pos_Arr, info_id["direccion"], Dir_Pos_Arr_Final])
     PilaO.append(Dir_Pos_Arr_Final)
