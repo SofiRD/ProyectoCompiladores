@@ -105,7 +105,7 @@ def assign_value(direccion, value):
 	if tipo_memoria == 2 :
 		TablaMemoria_tempGlobales[tipo][posicion] = value
 	if tipo_memoria == 3 :
-		print(pilaTablaMemoria_Locales_temp[-1],[tipo],[posicion])
+		#print(pilaTablaMemoria_Locales_temp[-1],[tipo],[posicion])
 		pilaTablaMemoria_Locales_temp[-1][tipo][posicion] = value
 	if tipo_memoria == 4 :
 		TablaMemoria_CTEs[tipo][posicion] = value 
@@ -171,6 +171,15 @@ while True:
 			posicion += 1
 		except Exception as e:
 			print(e)
+
+	elif instruccion[0] == "+2":
+		# +2 , OpIzq, OpDer(Directo), Direccion_Destino
+		try:
+			assign_value(instruccion[3], get_element(instruccion[1]) + instruccion[2])
+			posicion += 1
+		except Exception as e:
+			print(e)
+
 	elif instruccion[0] == "-":
 		# - , OpIzq, OpDer, Direccion_Destino
 		try:
@@ -223,7 +232,7 @@ while True:
 	elif instruccion[0] == "=":
 		# = , Direccion, , Direccion_Destino
 		try:
-			print(get_element(instruccion[1]), pilaTablaMemoria_Locales)
+			#print(get_element(instruccion[1]), pilaTablaMemoria_Locales)
 			assign_value(instruccion[3], get_element(instruccion[1]) )
 			posicion += 1
 		except Exception as e:
@@ -272,6 +281,13 @@ while True:
 		info_param = info_funcion["local_table"][instruccion[3]]
 		assign_parametro(info_param["direccion"], get_element(instruccion[1]))
 		posicion +=1
+
+	elif instruccion[0] == "VER" :
+		#VER, direccion, Liminf, Limsup
+		if(get_element(instruccion[1]) < instruccion[2] or get_element(instruccion[1]) > instruccion[3]):
+			print("“Error, exceso de dimensiones en el arreglo”")
+		else:
+			posicion += 1
 
 	elif instruccion[0] == "print" :
 		print(get_element(instruccion[3]))
