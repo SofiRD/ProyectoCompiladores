@@ -2,8 +2,7 @@
 # Sofia Recinos Dorst  A01657055
 # Ulrik Nuño Tapia  A00821805
 
-from curses import ERR
-from distutils.log import ERROR
+from re import U
 import ply.yacc as yacc
 
 # Get the token map from the lexer.  This is required.
@@ -450,24 +449,28 @@ def p_parametro_migaja1(p):
     global NombreFunc
     global TipoFunc
     
-
-    if p[2][0] in DirFunc[NombreFunc]["var_table"] :
-        print("Error, el parametro ", p[2], "ya había sido declarado")
-    else :
-        DirFunc[NombreFunc]["var_table"][p[2]] = {'nombre' : p[2],
-                                                  'tipo' : p[1],
-                                                  'direccion' : DirFunc[NombreFunc]["direcciones"][p[1]]}
-        DirFunc[NombreFunc]["local_table"].append({'nombre' : p[2],
-                                                   'tipo' : p[1],
-                                                   'direccion' : DirFunc[NombreFunc]["direcciones"][p[1]]})
-        DirFunc[NombreFunc]["direcciones"][p[1]] += 1
+    if (p[2][1] != "["):
+        if p[2][0] in DirFunc[NombreFunc]["var_table"] :
+            print("Error, el parametro ", p[2][0], "ya había sido declarado")
+        else :
+            DirFunc[NombreFunc]["var_table"][p[2][0]] = {'nombre' : p[2][0],
+                                                      'tipo' : UltimoTipo,
+                                                      'direccion' : DirFunc[NombreFunc]["direcciones"][UltimoTipo]}
+            DirFunc[NombreFunc]["local_table"].append({'nombre' : p[2][0],
+                                                       'tipo' : UltimoTipo,
+                                                       'direccion' : DirFunc[NombreFunc]["direcciones"][UltimoTipo]})
+            DirFunc[NombreFunc]["direcciones"][UltimoTipo] += 1
+    else:
+        print("Error, No se pueden recibir arreglos como parametros de funciones")
     p[0] = p[1]
 
 
 def p_guarda_tipo(p):
     'guarda_tipo : tipo'
+    print("llegue4")
     global UltimoTipo
     UltimoTipo = p[1]
+    p[0] = p[1]
 
 def p_parametros(p):
     """parametros : COMA parametro_migaja1 parametros 
@@ -477,13 +480,14 @@ def p_parametros(p):
 
 def p_decid(p):
     'decid : decid_migaja1 decarreglo'
-
+    print(PilaIDs[-1])
     p[0] = (PilaIDs[-1], p[2])
     PilaIDs.pop()
 
 def p_decid_migaja1(p):
     'decid_migaja1 : ID'
     PilaIDs.append(p[1])
+    print(p[1])
     p[0] = p[1]
 
 def p_decarreglo(p):
@@ -506,11 +510,11 @@ def p_decarreglo_migaja3(p):
      info_id["Nodos"][-1]["m"] = - K
      info_id["size"] = size
      info_id["Virtual_address"] = info_id["direccion"]
-     DirFunc[NombreFunc]["direcciones"][UltimoTipo] += size - 1
+     DirFunc[NombreFunc]["direcciones"][UltimoTipo] += size
 
 
 def p_decarreglo_migaja2(p):
-    "decarreglo_migaja2 : LBRAQUET decarreglo_migaja3 decarreglo_migaja4 RBRAQUET masdecarreglos"
+    "decarreglo_migaja2 : LBRAQUET decarreglo_migaja4 RBRAQUET masdecarreglos"
 
 def p_masdecarreglos(p):
     """masdecarreglos : masdecarreglo_migaja3 LBRAQUET decarreglo_migaja4 RBRAQUET masdecarreglos
@@ -518,25 +522,31 @@ def p_masdecarreglos(p):
 
 def p_decarreglo_migaja1(p):
     "decarreglo_migaja1 : "
-    info_id = get_ID_info(PilaIDs[-1])
+    global UltimoTipo
+    var_name = PilaIDs[-1]
+    DirFunc[NombreFunc]["var_table"][var_name]={'nombre' : var_name,
+                                'tipo' : UltimoTipo,
+                                'direccion' : DirFunc[NombreFunc]["direcciones"][UltimoTipo]
+                                }
+    info_id = DirFunc[NombreFunc]["var_table"][var_name]
     info_id["isArray"] = True
     info_id["dim"] = 0
     info_id["R"] = 1
-    info_id["Nodos"] = []
+    info_id["Nodos"] = [{"LimInf": 0,
+                             "LimSup": 0,
+                             "m": 0}]
     p[0] = "["
 
 def p_decarreglo_migaja4(p):
     "decarreglo_migaja4 : INTT"
     info_id = get_ID_info(PilaIDs[-1])
     info_id["Nodos"][-1]["LimSup"] = p[1]
-    PilaO.pop()
-    PilaTipos.pop()
     info_id["R"] *= (p[1] - 0 + 1)
 
     p[0] = p[1]
 
 def p_masdecarreglo_migaja3(p):
-    "masdecarreglo_migaja3 : decarreglo"
+    "masdecarreglo_migaja3 : "
     info_id = get_ID_info(PilaIDs[-1])
     info_id["dim"] += 1
     info_id["Nodos"].append({"LimInf": 0,
@@ -574,16 +584,19 @@ def p_instruccion(p):
 
 def p_decvariable(p):
     'decvariable : guarda_tipo ids PUNTOYCOMA'
+    global UltimoTipo
     global NombreFunc
     for var_name, is_arr in p[2]:
-        if var_name in DirFunc[NombreFunc]["var_table"]:
-            print("Error, la variable", var_name, "ya había sido declarada")
-        else:
-            DirFunc[NombreFunc]["var_table"][var_name]={'nombre' : var_name,
-                                'tipo' : p[1],
-                                'direccion' : DirFunc[NombreFunc]["direcciones"][p[1]]
-                                }
-            DirFunc[NombreFunc]["direcciones"][p[1]] += 1
+        print(var_name)
+        if is_arr != "[":
+            if var_name in DirFunc[NombreFunc]["var_table"]:
+                print("Error, la variable", var_name, "ya había sido declarada")
+            else:
+                DirFunc[NombreFunc]["var_table"][var_name]={'nombre' : var_name,
+                                                            'tipo' : UltimoTipo,
+                                                            'direccion' : DirFunc[NombreFunc]["direcciones"][UltimoTipo]
+                                                            }
+                DirFunc[NombreFunc]["direcciones"][UltimoTipo] += 1
     p[0] = p[1]
 
 def p_ids(p):
@@ -694,21 +707,29 @@ def p_asiguso(p):
 def p_asignacion(p):
     'asignacion : asignacion_migaja1 IGUAL expresion PUNTOYCOMA'
     id_info = get_ID_info(PilaIDs[-1])
-    
+    print("llegue 3")
     tipo_c = PilaTipos[-1]
     PilaTipos.pop()
-    if semantico[id_info["tipo"]]["="][tipo_c] != "error" : 
-        Cuadruplos.append(['=', PilaO[-1], " ", id_info["direccion"]])
+    Tipo_id = PilaTipos[-1]
+    PilaTipos.pop()
+    if semantico[Tipo_id]["="][tipo_c] != "error" : 
+        Cuadruplos.append(['=', PilaO[-1], " ", PilaO[-2]])
     else :
         print("Error no se puede realizar esta asignacion")
+    PilaO.pop()
     PilaO.pop()
     p[0] = p[1]
 
 def p_asignacion_migaja1(p):
-    'asignacion_migaja1 : '
+    """asignacion_migaja1 : arreglos
+                    | empty"""
+    print("llegue 2")
     id_info = get_ID_info(PilaIDs[-1])
     if id_info == False :
         print("Error, la variable", PilaIDs[-1],"no existe ")
+    elif p[1] is None:
+        PilaO.append(id_info["direccion"])
+        PilaTipos.append(id_info["tipo"])
 
 
 
@@ -841,23 +862,27 @@ def p_lecturaid_migaja1(p) :
     PilaIDs.append(p[1])
 
 def p_varids(p):
-    """varids : arreglos 
+    """varids : arreglos varids_migaja1 
                     | empty"""
 
-def p_arreglos(p):
-    'arreglos : arreglos_migaja1 LBRAQUET expresion arreglos_migaja2 RBRAQUET masarreglos'
+def p_varids_migaja1(p) :
+    'varids_migaja1 : '
     info_id = get_ID_info(PilaIDs[-1])
     Aux1 = PilaO[-1]
     PilaO.pop()
     Dir_Pos_Arr = next_temp("int")
-    Cuadruplos.append(["+", Aux1, info_id["Nodos"][-1]["m"]], Dir_Pos_Arr)
+    Cuadruplos.append(["+2", Aux1, info_id["Nodos"][-1]["m"], Dir_Pos_Arr])
     Dir_Pos_Arr_Final = next_temp("int")
-    Cuadruplos.append(["+", Dir_Pos_Arr, info_id["direccion"], Dir_Pos_Arr_Final])
+    Cuadruplos.append(["+2", Dir_Pos_Arr, info_id["direccion"], Dir_Pos_Arr_Final])
     PilaO.append(Dir_Pos_Arr_Final)
     PilaTipos.append(info_id["tipo"])
     PilaDims.pop()
     OpStack.pop()
     p[0] = '['
+
+def p_arreglos(p):
+    'arreglos : LBRAQUET arreglos_migaja1 expresion arreglos_migaja2 RBRAQUET masarreglos'
+
 
 def p_arreglos_migaja1(p):
     "arreglos_migaja1 : "
@@ -1112,6 +1137,8 @@ def p_usoid(p):
             PilaO.append(id_info["direccion"])
             tipo = id_info["tipo"]
             PilaTipos.append(tipo)
+        else:
+            print("Error, la variable", p[1], "No ha sido declarada")
     PilaIDs.pop()
     OpStack.pop()
     p[0] = p[1]
