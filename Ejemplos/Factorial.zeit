@@ -1,0 +1,15 @@
+start
+main () {
+  int c ;
+  c = 1 ;
+  int n ;
+  n = 10;
+  int fact ;
+  fact = 1 ;
+  while(c != n){
+      fact = fact * c;
+      c = c + 1;
+  }
+  print(fact);
+}
+end

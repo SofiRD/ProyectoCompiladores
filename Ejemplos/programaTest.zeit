@@ -1,0 +1,39 @@
+start
+int x ;
+
+function int hola(int x, int y){ return x;}
+
+function int fibo(int x){
+  if(x < 2){
+    return x;
+  }
+  int a;
+  int f1;
+  int f2;
+
+  a = fibo(x-1)+fibo(x-2);
+  return a;
+
+}
+
+main() {
+
+int a[5];
+a[2] = 3;
+
+while(x < 5)
+{
+    int y ;
+    y = 1 ;
+    x = x + 1;
+   print(x, y);
+}
+
+x = hola(3, 4);
+x = 1 ;
+print(fibo(10));
+
+print (a[2]);
+
+}
+end
