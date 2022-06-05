@@ -512,7 +512,6 @@ def p_decarreglo_migaja3(p):
      info_id = get_ID_info(PilaIDs[-1])
      Offset = 0
      size = info_id["R"]
-     print("size:", size)
      for nodo in info_id["Nodos"]:
          nodo["m"] = info_id["R"] / (nodo["LimSup"] - nodo["LimInf"] + 1)
          info_id["R"] = nodo["m"]
@@ -809,7 +808,7 @@ def p_return(p):
     PilaO.pop()
     id_info = DirFunc["global"]["var_table"][NombreFunc]
     if TipoFunc == "void":
-        print ("error")
+        print ("error, funciones de tipo void no poseen return")
     else:
         DirFunc[NombreFunc]["tiene_return"] = True
 
@@ -856,7 +855,6 @@ def p_lectura(p):
 
 def p_lecturaid(p):
     'lecturaid : lecturaid_migaja1 varids'
-    print("p2", p[2])
     if p[2] is None:
         id_info = get_ID_info(PilaIDs[-1])
         if id_info != False:
@@ -886,7 +884,6 @@ def p_arreglos(p):
     Cuadruplos.append(["+2", Dir_Pos_Arr, info_id["direccion"], Dir_Pos_Arr_Final])
     PilaO.append(Dir_Pos_Arr_Final)
     PilaTipos.append(info_id["tipo"])
-    print(PilaO)
     PilaDims.pop()
     OpStack.pop()
     p[0] = '['
@@ -909,18 +906,16 @@ def p_arreglos_migaja2(p):
         curr_dim = PilaDims[-1][1] 
         Nodo = info_id["Nodos"][curr_dim - 1]
         Cuadruplos.append(["VER", PilaO[-1], Nodo["LimInf"], Nodo["LimSup"]])
-        print("dims", curr_dim, info_id["dim"])
         if curr_dim < info_id["dim"]:
             if PilaTipos[-1] != "int":
                 print("ERROR, las dimensiones de los arreglos deben de ser enteras")
             aux = PilaO[-1]
             PilaO.pop()
             s1m1 = next_temp("int")
-            Cuadruplos.append(["*2", aux , Nodo["m"], s1m1])
+            Cuadruplos.append(["*2", aux , int(Nodo["m"]), s1m1])
             PilaO.append(s1m1)
 
         if(curr_dim > 1):
-            print("TTcc")
             aux2 = PilaO[-1]
             PilaO.pop()
             aux1 = PilaO[-1]
@@ -1209,7 +1204,7 @@ def compila(file_name):
     print(result)
     if result:
         #print("Si funciona!")
-       # pprint(Cuadruplos)
+        pprint(Cuadruplos)
         codigo_objeto = open(file_name+".geist","w")
         Cuadruplos_strings = []
         for c in Cuadruplos:
