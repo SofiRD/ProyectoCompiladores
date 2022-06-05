@@ -1,8 +1,7 @@
 # Sofia Recinos Dorst  A01657055
 # Ulrik Nuño Tapia  A00821805
 
-from sintaxis import DirFunc
-from sintaxis import TablaMemoria_CTEs
+from sintaxis import *
 
 TablaMemoria_globales = {'int' : [0]* DirFunc["global"]["direcciones"]["int"], 
 							'float' : [0]* (DirFunc["global"]["direcciones"]["float"] - 250), 
@@ -22,14 +21,23 @@ PilaFunciones = [ ]
 
 PilaPosiciones = [ ]
 
-print(DirFunc)
 Cuadruplos = []
-file_name = "programaTest.su"
- 
-with open(file_name+'.obj','r') as fileobj:   
+
+import sys
+
+if len(sys.argv) != 2:
+	print("Falta nombre del archivo")
+	exit()
+
+file_name = sys.argv[1]
+
+compila(file_name)
+
+
+with open(file_name+'.geist','r') as filegeist:   
  while(True):  
   
-  line = fileobj.readline()
+  line = filegeist.readline()
   if not line:
    break;
   line = line.strip()[1:-1]
@@ -41,7 +49,10 @@ with open(file_name+'.obj','r') as fileobj:
     else:
       cuadruplo_final.append(int(i))
   Cuadruplos.append(cuadruplo_final)
-print('de archivoooo', Cuadruplos)
+  
+ print("---------------------------")
+
+
 # Directorio de funciones
 # Globales: 0 - 2000
 #   int 0 - 250
