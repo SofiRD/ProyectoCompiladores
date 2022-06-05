@@ -122,7 +122,7 @@ def get_element(direccion):
                 if direccion-5000 < 250:
                     return get_element(TablaMemoria_globales['arr'][direccion-5000])
                 else:
-                    print("real::", pilaTablaMemoria_Locales[-1]['arr'][direccion-5250])
+                    #print("real::", pilaTablaMemoria_Locales[-1]['arr'][direccion-5250])
                     return get_element(pilaTablaMemoria_Locales[-1]['arr'][direccion-5250])
 
 def assign_value(direccion, value):
@@ -145,7 +145,7 @@ def assign_value(direccion, value):
                 if direccion-5000 < 250:
                     assign_value(TablaMemoria_globales['arr'][direccion-5000], value)
                 else:
-                    print("real:::", pilaTablaMemoria_Locales[-1]['arr'][direccion-5250])
+                    #print("real:::", pilaTablaMemoria_Locales[-1]['arr'][direccion-5250])
                     assign_value(pilaTablaMemoria_Locales[-1]['arr'][direccion-5250], value)
 
 #Para arreglos
@@ -166,10 +166,12 @@ def direct_assign_value(direccion, value):
 	if tipo_memoria == 4 :
 		TablaMemoria_CTEs[tipo][posicion] = value 
 	if tipo_memoria == 5 :
-                if direccion-5000 < 250:
-                    TablaMemoria_globales['arr'][direccion-5000] = int(value)
-                else:
-                    pilaTablaMemoria_Locales[-1]['arr'][direccion-5250] = int(value)
+		if direccion-5000 < 250:
+			TablaMemoria_globales['arr'][direccion-5000] = int(value)
+		else:
+			#print(pilaTablaMemoria_Locales[-1]['arr'][direccion-5250])
+			#print(int(value))
+			pilaTablaMemoria_Locales[-1]['arr'][direccion-5250] = int(value)
 
 
 def assign_parametro(direccion, value):
