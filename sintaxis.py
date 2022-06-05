@@ -5,6 +5,7 @@
 from re import U
 import ply.yacc as yacc
 import sys
+from pprint import pprint
 
 # Get the token map from the lexer.  This is required.
 from lexico import tokens
@@ -1203,21 +1204,20 @@ start = 'programa'
 def p_error(p):
     print("Syntax error")
 
-parser = yacc.yacc(debug = True) 
-
-file_name = "programaTest.su"
-code_file = open(file_name, "r")
-code_lines = code_file.read()
-result = parser.parse(code_lines)
-print(result)
-if result:
-    print("Si funciona!")
-    print(Cuadruplos)
-    codigo_objeto = open(file_name+".obj","w")
-    Cuadruplos_strings = []
-    for c in Cuadruplos:
-        Cuadruplos_strings.append(str(c)+'\n')
-    codigo_objeto.writelines(Cuadruplos_strings)
-    codigo_objeto.close()
-else:
-    print("Error en sintaxis")
+def compila(file_name):
+    parser = yacc.yacc(debug = True) 
+    code_file = open(file_name+".zeit", "r")
+    code_lines = code_file.read()
+    result = parser.parse(code_lines)
+    print(result)
+    if result:
+        print("Si funciona!")
+        pprint(Cuadruplos)
+        codigo_objeto = open(file_name+".geist","w")
+        Cuadruplos_strings = []
+        for c in Cuadruplos:
+            Cuadruplos_strings.append(str(c)+'\n')
+        codigo_objeto.writelines(Cuadruplos_strings)
+        codigo_objeto.close()
+    else:
+        print("Error en sintaxis")
