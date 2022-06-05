@@ -382,7 +382,7 @@ while True:
 
 	elif instruccion[0] == "read" :
 		try:
-			Nameinput = input()
+			Nameinput = input("cin>> ")
 			tipo_dir = get_tipo_dir(instruccion[3])
 			if tipo_dir == "int":
 				Nameinput = int(Nameinput)
