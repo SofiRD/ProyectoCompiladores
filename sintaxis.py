@@ -498,7 +498,6 @@ def p_decid(p):
 def p_decid_migaja1(p):
     'decid_migaja1 : ID'
     PilaIDs.append(p[1])
-    print(p[1])
     p[0] = p[1]
 
 def p_decarreglo(p):
@@ -599,7 +598,6 @@ def p_decvariable(p):
     global UltimoTipo
     global NombreFunc
     for var_name, is_arr in p[2]:
-        print(var_name)
         if is_arr != "[":
             if var_name in DirFunc[NombreFunc]["var_table"]:
                 print("Error, la variable", var_name, "ya había sido declarada")
@@ -719,7 +717,6 @@ def p_asiguso(p):
 def p_asignacion(p):
     'asignacion : asignacion_migaja1 IGUAL expresion PUNTOYCOMA'
     id_info = get_ID_info(PilaIDs[-1])
-    print("llegue 3")
     tipo_c = PilaTipos[-1]
     PilaTipos.pop()
     Tipo_id = PilaTipos[-1]
@@ -1211,8 +1208,8 @@ def compila(file_name):
     result = parser.parse(code_lines)
     print(result)
     if result:
-        print("Si funciona!")
-        pprint(Cuadruplos)
+        #print("Si funciona!")
+       # pprint(Cuadruplos)
         codigo_objeto = open(file_name+".geist","w")
         Cuadruplos_strings = []
         for c in Cuadruplos:
@@ -1221,3 +1218,4 @@ def compila(file_name):
         codigo_objeto.close()
     else:
         print("Error en sintaxis")
+
