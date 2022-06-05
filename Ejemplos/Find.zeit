@@ -26,25 +26,32 @@ main () {
 
   while (i < size) {
     arr[i] = random();
+    print(arr[i]);
     i = i + 1;
   }
 
   bool found;
-  int value;
-  value = 1;
+  int value, position;
+  value = 8;
   i = 0;
+  position = 0;
   
   while (i < size) {
     if (arr[i] == value) {
       found = true;
+      position = i;
     }
 
     i = i + 1;
   }
 
   if (found) {
-    print("Value found at position");
-    print(i);
+    print("Value");
+    print(value);
+
+    print("Found at position");
+    print(position);
+
   } else {
     print("Value not found");
   }
