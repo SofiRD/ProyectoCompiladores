@@ -1,0 +1,53 @@
+start
+
+int rand_state;
+
+function int random() {
+  while (rand_state < 100) {
+    rand_state = rand_state + 43;
+  }
+
+  int n;
+  n = rand_state;
+  rand_state = rand_state - 100;
+
+  while (n > 10) {
+    n = n - 10;
+  }
+
+  return n;
+}
+
+main () {
+  rand_state = 42;
+
+  int arr[10], i, size;
+  size = 10;
+
+  while (i < size) {
+    arr[i] = random();
+    i = i + 1;
+  }
+
+  bool found;
+  int value;
+  value = 1;
+  i = 0;
+  
+  while (i < size) {
+    if (arr[i] == value) {
+      found = true;
+    }
+
+    i = i + 1;
+  }
+
+  if (found) {
+    print("Value found at position");
+    print(i);
+  } else {
+    print("Value not found");
+  }
+}
+
+end

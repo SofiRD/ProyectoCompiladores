@@ -1,0 +1,19 @@
+start
+ function int patito(int x, int y, float z){
+        int p;
+              while(y<x){
+                  int bb;
+                  print(z);
+                  y = y + 1;
+                  p = y ;
+              }
+      return p;
+  }
+main() {
+  int x, y;
+  float z;
+  int k ;
+  k = patito(5, 2, 5.1) + 70 ;
+  print (k);
+}
+end
