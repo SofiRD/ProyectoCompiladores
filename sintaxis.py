@@ -1119,7 +1119,6 @@ def p_floatt(p):
 def p_booll(p):
     """booll : TRUE
         | FALSE"""
-    PilaO.append(p[1])
     PilaTipos.append("bool")
     if p[1] == "true" :
         PilaO.append(4750)
