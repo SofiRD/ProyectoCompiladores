@@ -1204,7 +1204,7 @@ def compila(file_name):
     print(result)
     if result:
         #print("Si funciona!")
-        pprint(Cuadruplos)
+        #pprint(Cuadruplos)
         codigo_objeto = open(file_name+".geist","w")
         Cuadruplos_strings = []
         for c in Cuadruplos:
