@@ -1,0 +1,36 @@
+start
+
+function int factorial_iter(int n) {
+  int i, ans;
+  i = 1;
+  ans = n;
+
+  while (i < n) {
+    ans = ans * i;
+    i = i + 1;
+  }
+
+  return ans;
+}
+
+function int factorial_rec(int n) {
+  if (n == 1) {
+    return 1;
+  } else {
+    return n * factorial_rec(n - 1);
+  }
+}
+
+function int patito(int n) {
+  return 3 * factorial_iter(n) + 2;
+}
+
+main () {
+  int x;
+  x = 1;
+  
+  print(patito(10));
+ 
+}
+
+end

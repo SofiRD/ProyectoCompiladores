@@ -1,0 +1,34 @@
+start
+
+function int factorial_iter(int n) {
+  int i, ans;
+  i = 1;
+  ans = 1;
+
+  while (i < n) {
+    ans = ans * i;
+    i = i + 1;
+  }
+
+  return ans;
+}
+
+function int factorial_rec(int n) {
+  if (n == 1) {
+    return 1;
+  } else {
+    return n * factorial_rec(n - 1);
+  }
+}
+
+main () {
+  int i, n, ans;
+  i = 1;
+
+  while(i < 10){
+    print(factorial_iter(i));
+    i = i + 1;
+  }
+}
+
+end

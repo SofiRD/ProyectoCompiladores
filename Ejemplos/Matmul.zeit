@@ -1,0 +1,67 @@
+start
+main () {
+  int matA[3][3], matB[3][3], matC[3][3];
+   int i, j, k, I, J, K;
+   i = 1;
+    I = 4;
+    J = 4;
+    K = 4;
+
+    print("Mat A");
+    while (i < I) {
+    j = 1;
+
+    while (j < J) {
+        matA[i][j] = j;
+        print(matA[i][j]);
+        j = j + 1;
+    }
+    i = i + 1;
+   }
+
+    print("Mat B");
+
+    i = 1;
+
+    while (i < I) {
+    j = 1;
+    while (j < J) {
+        matB[i][j] = j;
+        print(matB[i][j]);
+        j = j + 1;
+    }
+i = i + 1;
+   }
+
+i = 1;
+
+    while (i < I) {
+    j = 1;
+
+    while (j < J) {
+        k = 0;
+
+        while (k < K) {
+            matC[i][j] = matC[i][j] + matA[i][k] * matA[k][j];
+            k = k + 1;
+        }
+j = j + 1;
+    }
+i = i + 1;
+   }
+
+    print("Mat C");
+
+    i = 1;
+
+    while (i < I) {
+    j = 1;
+    while (j < J) {
+        print(matC[i][j]);
+        j = j + 1;
+    }
+i = i + 1;
+    }
+}
+
+end

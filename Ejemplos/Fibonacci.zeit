@@ -1,0 +1,48 @@
+start
+
+function int fibonacci_rec(int n) {
+  if (n == 0) {
+    return 0;
+  } else {
+    if (n == 1) {
+      return 1;
+    } else {
+      return fibonacci_rec(n - 1) + fibonacci_rec(n - 2);
+    }
+  }
+}
+
+function int fibonacci_iter(int n) {
+  int f0, f1, tmp, i;
+  f0 = 0;
+  f1 = 1;
+  i = 0;
+
+  while (i < n) {
+    tmp = f1;
+    f1 = f0 + tmp;
+    f0 = tmp;
+    i = i + 1;
+  }
+
+  return f0;
+}
+
+main () {
+  int i, ans;
+  i = 0;
+
+  while (i < 10) {
+    ans = fibonacci_rec(i);
+    print("recursivo");
+    print(ans);
+
+    ans = fibonacci_iter(i);
+    print("iterativo");
+    print(ans);
+
+    i = i + 1;
+  }
+}
+
+end
