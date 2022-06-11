@@ -299,8 +299,12 @@ semantico = {
 # VARIABLES GLOBALES
 NombreFunc = "global"
 TipoFunc = "global"
-
 UltimoTipo = "void"
+
+#Variable para identificar declaracion de clases
+current_class = None
+current_used_class = None
+
 
 def next_temp(tipo_var):
     global NombreFunc
@@ -329,15 +333,19 @@ DirFunc = {
                 }
 }
 
+DirClases = {}
+
+
 def get_ID_info(n_id):
     global NombreFunc
-    if n_id not in DirFunc[NombreFunc]["var_table"] :
-        if n_id not in DirFunc["global"]["var_table"] :
-            return False 
-        return DirFunc["global"]["var_table"][n_id]
- 
-    else :
+    if n_id in DirFunc[NombreFunc]["var_table"] :
         return DirFunc[NombreFunc]["var_table"][n_id]
+    elif current_class != None and n_id in DirClases[current_class]["variables_clase"]:
+        return DirClases[current_class]["variables_clase"][n_id]
+    elif n_id in DirFunc["global"]["var_table"] :
+        return DirFunc["global"]["var_table"][n_id]
+    return False
+        
 
 def p_programa(p):
     'programa : START programa1 main END'
@@ -415,16 +423,19 @@ def p_decfuncion_migaja1(p):
         print("Error, la funcion ", p[2], "ya había sido declarada")
         sys.exit()
     else:
-        NombreFunc = p[2]
+        if current_class == None:
+            NombreFunc = p[2]
+        else:
+            NombreFunc = current_class+"."+p[2]
         TipoFunc = p[1]
 
-        DirFunc[p[2]]={"nombre" : p[2] , "tipo" : p[1], "DirIni" : len(Cuadruplos),
+        DirFunc[NombreFunc]={"nombre" : NombreFunc , "tipo" : p[1], "DirIni" : len(Cuadruplos),
                      "var_table" : {}, "local_table" : [], "NumParam" : 0, 
                      "NumVars" : 0, "NumTemp" : 0, "tiene_return" : False,
                      "direcciones": {'int' : 1000 , 'float' : 1250, 'string' : 1500, 'bool' : 1750, 'arr' : 5250},
                      "direcciones_temporales": {'int' : 3000 , 'float' : 3250, 'string' : 3500, 'bool' : 3750}}
         if p[1] != "void" :
-            DirFunc["global"]["var_table"][p[2]] = {'nombre' : p[2],
+            DirFunc["global"]["var_table"][NombreFunc] = {'nombre' : NombreFunc,
                                                     'tipo' : p[1],
                                                     'direccion' : DirFunc["global"]["direcciones"][p[1]]}
             DirFunc["global"]["direcciones"][p[1]] += 1
@@ -475,6 +486,7 @@ def p_parametro_migaja1(p):
             DirFunc[NombreFunc]["direcciones"][UltimoTipo] += 1
     else:
         print("Error, No se pueden recibir arreglos como parametros de funciones")
+        sys.exit()
     p[0] = p[1]
 
 
@@ -506,6 +518,7 @@ def p_decarreglo(p):
     p[0] = p[1]
 
 def p_decarreglo_migaja3(p):
+    #index
      "decarreglo_migaja3 : "
      global NombreFunc
      global UltimoTipo
@@ -564,7 +577,20 @@ def p_masdecarreglo_migaja3(p):
                              "m": 0})
 
 def p_clase(p):
-    'clase : CLASS ID bloqueclase'
+    'clase : CLASS clase_migaja1 bloqueclase'
+    global current_class
+    current_class = None
+    p[0] = p[1]
+
+def p_clase_migaja1(p):
+    'clase_migaja1 : ID'
+    global current_class
+    current_class = p[1]
+    if current_class not in DirClases:
+        DirClases[current_class] = { "variables_clase" : {} }
+    else:
+        print("Error, la clase", p[1], "ya fue declarada")
+        sys.exit()
     p[0] = p[1]
 
 def p_bloqueclase(p):
@@ -600,12 +626,20 @@ def p_decvariable(p):
         if is_arr != "[":
             if var_name in DirFunc[NombreFunc]["var_table"]:
                 print("Error, la variable", var_name, "ya había sido declarada")
+                sys.exit()
             else:
-                DirFunc[NombreFunc]["var_table"][var_name]={'nombre' : var_name,
+                if current_class != None:
+                    DirClases[current_class]["variables_clase"][var_name] = {'nombre' : var_name,
                                                             'tipo' : UltimoTipo,
                                                             'direccion' : DirFunc[NombreFunc]["direcciones"][UltimoTipo]
                                                             }
-                DirFunc[NombreFunc]["direcciones"][UltimoTipo] += 1
+                    DirFunc[NombreFunc]["direcciones"][UltimoTipo] += 1
+                else:
+                    DirFunc[NombreFunc]["var_table"][var_name]={'nombre' : var_name,
+                                                            'tipo' : UltimoTipo,
+                                                            'direccion' : DirFunc[NombreFunc]["direcciones"][UltimoTipo]
+                                                            }
+                    DirFunc[NombreFunc]["direcciones"][UltimoTipo] += 1
     p[0] = p[1]
 
 def p_ids(p):
@@ -631,6 +665,7 @@ def p_condicion_migaja1(p):
 
     if tipo_c != "bool":
         print("ERROR!! la expresion en el if no es boolena")
+        sys.exit()
     else:
         Cuadruplos.append(['gotoF', condicion," ", "_"])
         PilaSaltos.append(len(Cuadruplos)-1)
@@ -667,6 +702,7 @@ def p_while_migaja2(p):
     PilaTipos.pop()
     if tipo_c != "bool":
         print("ERROR!! la expresion en el while no es booleano")
+        sys.exit()
     Cuadruplos.append(['gotoF', PilaO[-1], " ", '_'])
     PilaO.pop()
     PilaSaltos.append(len(Cuadruplos)-1)
@@ -688,7 +724,10 @@ def p_asignacion_usofuncion(p):
 
 def p_asignacion_usofuncion_migaja1(p):
     'asignacion_usofuncion_migaja1 : ID'
-    PilaIDs.append(p[1])
+    if current_used_class != None:
+        PilaIDs.append(current_used_class+"."+p[1])
+    else:
+        PilaIDs.append(p[1])
     p[0] = p[1]
 
 #MIGAJA1 DE LLAMADA: VERIFICA QUE LA FUNCION EXISTA EN DIRFUNC
@@ -724,19 +763,23 @@ def p_asignacion(p):
         Cuadruplos.append(['=', PilaO[-1], " ", PilaO[-2]])
     else :
         print("Error no se puede realizar esta asignacion")
+        sys.exit()
     PilaO.pop()
     PilaO.pop()
     p[0] = p[1]
 
 def p_asignacion_migaja1(p):
     """asignacion_migaja1 : arreglos
+                    | punto
                     | empty"""
-    id_info = get_ID_info(PilaIDs[-1])
-    if id_info == False :
-        print("Error, la variable", PilaIDs[-1],"no existe ")
-    elif p[1] is None:
-        PilaO.append(id_info["direccion"])
-        PilaTipos.append(id_info["tipo"])
+    if p[1]!= ".":
+        id_info = get_ID_info(PilaIDs[-1])
+        if id_info == False :
+            print("Error, la variable", PilaIDs[-1],"no existe ")
+            sys.exit()
+        elif p[1] is None:
+            PilaO.append(id_info["direccion"])
+            PilaTipos.append(id_info["tipo"])
 
 
 
@@ -750,15 +793,18 @@ def p_usofuncion_migaja1(p):
 
     if PilaIDs[-1] not in DirFunc :
         print ("Error, esa función no ha sido declarada")
+        sys.exit()
     else: 
         if DirFunc[PilaIDs[-1]]["tipo"] != "void" :
             print ("ERROR, la funcion", PilaIDs[-1] , "no tiene donde regresar su valor")
+            sys.exit()
         Cuadruplos.append(["ERA", " " , " ", PilaIDs[-1]])
     
 def p_usofuncion_migaja2(p):
     'usofuncion_migaja2 : expresiones'
     if len(p[1]) != len(DirFunc[PilaIDs[-1]]["local_table"]):
         print("Error, no tiene el numero correcto de parametros para la funcion")
+        sys.exit()
     else:
         for i in range(len(p[1])):
             tipo_declaracion = DirFunc[PilaIDs[-1]]["local_table"][i]["tipo"]
@@ -767,6 +813,7 @@ def p_usofuncion_migaja2(p):
                 Cuadruplos.append(["PARAM", p[1][i]["nombre"], " ", i])
             else:
                 print("Error, asignacion a parametro de tipo incompatible")
+                sys.exit()
 
 def p_expresiones(p):
     """expresiones : expresion expresionesvarias
@@ -809,6 +856,7 @@ def p_return(p):
     id_info = DirFunc["global"]["var_table"][NombreFunc]
     if TipoFunc == "void":
         print ("error, funciones de tipo void no poseen return")
+        sys.exit()
     else:
         DirFunc[NombreFunc]["tiene_return"] = True
 
@@ -816,6 +864,7 @@ def p_return(p):
         Cuadruplos.append(['=', Resultado_expresion, " ", id_info["direccion"]])
     else :
         print("Error el return no es el mismo tipo de la funcion")
+        sys.exit()
 
     Cuadruplos.append(["ENDFUNC", " " , " " , " "])
     
@@ -862,6 +911,7 @@ def p_lecturaid(p):
             PilaTipos.append(id_info["tipo"])
         else:
             print("Error, la variable", PilaIDs[-1], "no existe")
+            sys.exit()
     p[0] = p[1]
 
 def p_lecturaid_migaja1(p) :
@@ -879,9 +929,9 @@ def p_arreglos(p):
     Aux1 = PilaO[-1]
     PilaO.pop()
     Dir_Pos_Arr = next_temp("int")
-    Cuadruplos.append(["+2", Aux1, int(info_id["Nodos"][-1]["m"]), Dir_Pos_Arr])
+    Cuadruplos.append(["Dir+ValDirecto", Aux1, int(info_id["Nodos"][-1]["m"]), Dir_Pos_Arr])
     Dir_Pos_Arr_Final = next_arr()
-    Cuadruplos.append(["+2", Dir_Pos_Arr, info_id["direccion"], Dir_Pos_Arr_Final])
+    Cuadruplos.append(["Dir+ValDirecto", Dir_Pos_Arr, info_id["direccion"], Dir_Pos_Arr_Final])
     PilaO.append(Dir_Pos_Arr_Final)
     PilaTipos.append(info_id["tipo"])
     PilaDims.pop()
@@ -901,6 +951,7 @@ def p_arreglos_migaja1(p):
 def p_arreglos_migaja2(p):
     "arreglos_migaja2 : "
     info_id = get_ID_info(PilaIDs[-1])
+    #print(info_id)
  
     if info_id["isArray"]:
         curr_dim = PilaDims[-1][1] 
@@ -909,10 +960,11 @@ def p_arreglos_migaja2(p):
         if curr_dim < info_id["dim"]:
             if PilaTipos[-1] != "int":
                 print("ERROR, las dimensiones de los arreglos deben de ser enteras")
+                sys.exit()
             aux = PilaO[-1]
             PilaO.pop()
             s1m1 = next_temp("int")
-            Cuadruplos.append(["*2", aux , int(Nodo["m"]), s1m1])
+            Cuadruplos.append(["Dir*ValDirecto", aux , int(Nodo["m"]), s1m1])
             PilaO.append(s1m1)
 
         if(curr_dim > 1):
@@ -925,6 +977,7 @@ def p_arreglos_migaja2(p):
             PilaO.append(val_k)
     else:
         print("ERROR, el arreglo debe tener dimensiones enteras")
+        sys.exit()
 
 def p_masarreglos(p):
     """masarreglos : masarreglos_migaja1 arreglos2
@@ -959,6 +1012,7 @@ def p_expresion(p):
             PilaTipos.append(tipoRes)
         else:
             print("Error, El tipo de operador es incorrecto")
+            sys.exit()
     p[0] = "exp"
 
 def p_expresion_migaja(p):
@@ -1005,6 +1059,7 @@ def p_aritmetica_migaja(p):
             PilaTipos.append(tipoRes)
         else:
             print("Error, El tipo de operador es incorrecto")
+            sys.exit()
 
 def p_aritmetica2(p):
     """aritmetica2 : sumres aritmetica
@@ -1042,6 +1097,7 @@ def p_termino_migaja(p):
             PilaTipos.append(tipoRes)
         else:
             print("Error, El tipo de operador es incorrecto")
+            sys.exit()
 
 def p_ari(p):
     """ari : multdiv termino
@@ -1072,6 +1128,7 @@ def p_factor(p):
             PilaTipos.append(tipoRes)
         else:
             print("Error, El tipo de operador es incorrecto")
+            sys.exit()
 
 
     if p[1] == '(' and len(OpStack) > 0 and OpStack[-1] == '(':
@@ -1138,27 +1195,56 @@ def p_stringg(p):
 def p_usoid(p):
     'usoid : usoid_migaja1 arrfunc punto'
     if p[2] is None and p[3] is  None:
-        id_info = get_ID_info(p[1])
-        if id_info != False:
-            PilaO.append(id_info["direccion"])
-            tipo = id_info["tipo"]
-            PilaTipos.append(tipo)
+        if current_used_class != None:
+            if p[1] in DirClases[current_used_class]["variables_clase"]:
+                id_info = DirClases[current_used_class]["variables_clase"][p[1]]
+                PilaO.append(id_info["direccion"])
+                tipo = id_info["tipo"]
+                PilaTipos.append(tipo)
+            else:
+                print("Error, la variable", PilaIDs[-1], "No ha sido declarada")
+                sys.exit()
         else:
-            print("Error, la variable", p[1], "No ha sido declarada")
+            id_info = get_ID_info(p[1])
+            if id_info != False:
+                PilaO.append(id_info["direccion"])
+                tipo = id_info["tipo"]
+                PilaTipos.append(tipo)
+            else:
+                print("Error, la variable", p[1], "No ha sido declarada")
+                sys.exit()
     PilaIDs.pop()
     OpStack.pop()
     p[0] = p[1]
 
 def p_usoid_migaja1(p):
     'usoid_migaja1 : ID'
-    PilaIDs.append(p[1])
+    if current_used_class != None:
+        PilaIDs.append(current_used_class+"."+p[1])
+    else:
+        PilaIDs.append(p[1])
     OpStack.append('ID')
     p[0] = p[1]
 
 def p_punto(p):
-    """punto : PUNTO usoid 
+    """punto : PUNTO punto_migaja1 usoid punto_migaja2
                 | empty"""
     p[0] = p[1]
+
+def p_punto_migaja1(p):
+    'punto_migaja1 : '
+    global current_used_class
+    if PilaIDs[-1] in DirClases:
+        current_used_class = PilaIDs[-1]
+    else:
+        print("Error,", PilaIDs[-1], "no es una clase")
+        sys.exit()
+
+def p_punto_migaja2(p):
+    'punto_migaja2 : '
+    global current_used_class
+    current_used_class = None
+    
 
 def p_arrfunc(p):
     """arrfunc :  arreglos 
@@ -1169,11 +1255,12 @@ def p_arrfunc(p):
 def p_funciones(p):
     'funciones : funciones_migaja1 LPAREN usofuncion_migaja2 RPAREN'
     Cuadruplos.append(["GOSUB", PilaIDs[-1] , " " , DirFunc[PilaIDs[-1]]["DirIni"]])
-    function_info = DirFunc["global"]["var_table"][PilaIDs[-1]]
-    direccion_temporal = next_temp(function_info["tipo"])
-    Cuadruplos.append(["=", function_info["direccion"],"" , direccion_temporal])
-    PilaO.append(direccion_temporal)
-    PilaTipos.append(function_info["tipo"])
+    if DirFunc[PilaIDs[-1]]["tipo"] != "void":
+        function_info = DirFunc["global"]["var_table"][PilaIDs[-1]]
+        direccion_temporal = next_temp(function_info["tipo"])
+        Cuadruplos.append(["=", function_info["direccion"],"" , direccion_temporal])
+        PilaO.append(direccion_temporal)
+        PilaTipos.append(function_info["tipo"])
     p[0] = '('
 
 def p_funciones_migaja1(p):
@@ -1181,9 +1268,11 @@ def p_funciones_migaja1(p):
 
     if PilaIDs[-1] not in DirFunc :
         print ("Error, esa función no ha sido declarada")
+        sys.exit()
     else: 
-        if DirFunc[PilaIDs[-1]]["tipo"] == "void" :
+        if DirFunc[PilaIDs[-1]]["tipo"] == "void" and current_used_class == None :
             print ("ERROR, la funcion", PilaIDs[-1] , "no regresa valor")
+            sys.exit()
         Cuadruplos.append(["ERA", " " , " ", PilaIDs[-1]])
 
 def p_empty(p):
@@ -1194,6 +1283,7 @@ start = 'programa'
 
 def p_error(p):
     print("Syntax error")
+    sys.exit()
 
 def compila(file_name):
     parser = yacc.yacc(debug = True) 
@@ -1212,4 +1302,5 @@ def compila(file_name):
         codigo_objeto.close()
     else:
         print("Error en sintaxis")
+        sys.exit()
 
