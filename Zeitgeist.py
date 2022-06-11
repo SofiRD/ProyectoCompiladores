@@ -13,6 +13,7 @@ file_name = sys.argv[1]
 
 compila(file_name)
 
+
 TablaMemoria_globales = {'int' : [0]* DirFunc["global"]["direcciones"]["int"], 
 							'float' : [0]* (DirFunc["global"]["direcciones"]["float"] - 250), 
 							'string' : [""]* (DirFunc["global"]["direcciones"]["string"] - 500), 
@@ -27,9 +28,7 @@ TablaMemoria_tempGlobales = {'int' : [0]* (DirFunc["global"]["direcciones_tempor
 
 pilaTablaMemoria_Locales = [] 
 pilaTablaMemoria_Locales_temp = [] 
-
 PilaFunciones = [ ]
-
 PilaPosiciones = [ ]
 
 Cuadruplos = []
@@ -80,6 +79,8 @@ with open(file_name+'.geist','r') as filegeist:
 #   float 4250 - 4500
 #   string 4500 - 4750
 #   bool 4750 - 4752
+#Arreglos Globales 5000-5250
+#Arreglos Locales 5250-5500
 
 def get_tipo_dir(direccion):
 	numero_tipo = direccion%1000
@@ -102,7 +103,6 @@ def get_posicion_dir(direccion):
 		return numero_posicion - 500
 	elif numero_posicion < 1000 :
 		return numero_posicion - 750
-
 
 def get_element(direccion):
 	tipo_memoria = direccion//1000
@@ -143,7 +143,7 @@ def assign_value(direccion, value):
 		TablaMemoria_CTEs[tipo][posicion] = value 
 	if tipo_memoria == 5 :
                 if direccion-5000 < 250:
-                    assign_value(TablaMemoria_globales['arr'][direccion-5000], value)
+                    assign_value(TablaMemoria_globales['arr'][direccion-5000], value) #1007
                 else:
                     #print("real:::", pilaTablaMemoria_Locales[-1]['arr'][direccion-5250])
                     assign_value(pilaTablaMemoria_Locales[-1]['arr'][direccion-5250], value)
@@ -167,7 +167,7 @@ def direct_assign_value(direccion, value):
 		TablaMemoria_CTEs[tipo][posicion] = value 
 	if tipo_memoria == 5 :
 		if direccion-5000 < 250:
-			TablaMemoria_globales['arr'][direccion-5000] = int(value)
+			TablaMemoria_globales['arr'][direccion-5000] = int(value) #80
 		else:
 			#print(pilaTablaMemoria_Locales[-1]['arr'][direccion-5250])
 			#print(int(value))
@@ -225,7 +225,6 @@ def GoSub():
 	pilaTablaMemoria_Locales_temp.append(sig_TablaMemoria_Locales_temp)
 	
 
-
 posicion = 0 
 Era("main")
 GoSub()
@@ -242,8 +241,8 @@ while True:
 			print(e)
 			exit()
 
-	elif instruccion[0] == "+2":
-		# +2 , OpIzq, OpDer(Directo), Direccion_Destino
+	elif instruccion[0] == "Dir+ValDirecto":
+		# Dir+ValDirecto , OpIzq, OpDer(Directo), Direccion_Destino
 		try:
 			direct_assign_value(instruccion[3], get_element(instruccion[1]) + instruccion[2])
 			posicion += 1
@@ -251,8 +250,8 @@ while True:
 			print(e)
 			exit()
 
-	elif instruccion[0] == "*2":
-		# *2 , OpIzq, OpDer(Directo), Direccion_Destino
+	elif instruccion[0] == "Dir*ValDirecto":
+		# Dir*ValDirecto , OpIzq, OpDer(Directo), Direccion_Destino
 		try:
 			assign_value(instruccion[3], get_element(instruccion[1]) * instruccion[2])
 			posicion += 1
@@ -373,6 +372,7 @@ while True:
 		#VER, direccion, Liminf, Limsup
 		if(get_element(instruccion[1]) < instruccion[2] or get_element(instruccion[1]) > instruccion[3]):
 			print("“Error, exceso de dimensiones en el arreglo”")
+			exit()
 		else:
 			posicion += 1
 
@@ -396,7 +396,7 @@ while True:
 				else:
 					print("Error")
 					Nameinput = False
-			print(instruccion, Nameinput)
+			#print(instruccion, Nameinput)
 			assign_value(instruccion[3], Nameinput)
 		except Exception as e:
 			print(e)
