@@ -1,0 +1,61 @@
+start
+  
+class tienda{
+  float precioPelota, precioJuguete;
+
+  function bool inicializar(){
+  precioPelota =  20;
+  precioJuguete = 70;
+  return true;
+  }
+
+  }
+
+class cliente{
+  float dinero;
+
+  function float comprarPelotas(int cant){
+  float precioPelotas;
+  precioPelotas = tienda.precioPelota * cant;
+  if(dinero < precioPelotas){
+    print("Lo sentimos, no te alcanza", "Nuevo saldo:");
+    return dinero;
+  } else {
+  print("gracias por su compra", "Nuevo saldo:");
+  dinero = dinero - precioPelotas;
+  return dinero;
+  }
+
+  }
+
+  function float comprarJuguetes(int cant){
+  float precioJuguete;
+  precioJuguete = tienda.precioJuguete * cant;
+  if(dinero < precioJuguete){
+    print("Lo sentimos, no te alcanza", "Nuevo saldo:");
+    return dinero;
+  } else {
+  print("gracias por su compra", "Nuevo saldo:");
+  dinero = dinero - precioJuguete;
+  return dinero;
+  }
+  }
+
+}
+
+
+main () {
+float dineroTotal;
+dineroTotal = 800;
+cliente.dinero = dineroTotal;
+bool a ;
+a = tienda.inicializar();
+
+print(cliente.comprarPelotas(3));
+print(cliente.comprarJuguetes(2));
+print(cliente.comprarPelotas(1000));
+
+}
+
+end
+

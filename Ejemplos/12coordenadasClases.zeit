@@ -1,0 +1,48 @@
+start
+
+function float Sqrt(int number){
+	float guess, error, limInf, limSup;
+	limInf = 0;
+	limSup = number;
+	guess = number/2;
+	error = 0.0000000000000000001;
+	bool seguir;
+	float guess2;
+	guess2 = guess * guess;
+	if (guess2>number){
+		seguir = guess2-number > error;
+	} else {
+		seguir = number-guess2 > error;
+	}
+	while(seguir){
+		if (guess2>number){
+		    limSup = guess;
+		    guess = (guess+limInf) / 2;
+			seguir = guess2-number > error;
+		} else {
+		    limInf = guess;
+		    guess = (limSup+guess) / 2;
+			seguir = number-guess2 > error;
+		}
+		guess2 = guess*guess;
+	}
+	return guess;
+}
+
+class coordenada {
+	int x, y;
+	function float distancia(int x2, int y2){
+	   return Sqrt((x2-x)*(x2-x)+(y2-y)*(y2-y));
+	}
+}
+
+main(){
+	int x, y;
+	read(x);
+	coordenada.x = x;
+	read(y);
+	coordenada.y = y;
+	print(coordenada.distancia(0,0));
+}
+end
+
